@@ -12,5 +12,5 @@ void kernel_early(void)
 
 void kernel_main(void)
 {
-	printf("Hello, kernel World!\n");
+	printf("FreeMicros\nVersion 0.01\n");
 }
