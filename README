@@ -1,0 +1,25 @@
+ _____              __  __ _                _   _ _      
+|  ___| __ ___  ___|  \/  (_) ___ _ __ ___ | \ | (_)_  __
+| |_ | '__/ _ \/ _ \ |\/| | |/ __| '__/ _ \|  \| | \ \/ /
+|  _|| | |  __/  __/ |  | | | (__| | | (_) | |\  | |>  < 
+|_|  |_|  \___|\___|_|  |_|_|\___|_|  \___/|_| \_|_/_/\_\
+                                                         
+Version 0.01 
+
+     Licensing Information
+Read the attached LICENSE file for licensing information.
+
+     Project Creator Information
+My name Will Jones and I can be
+contacted by phone at +1(818)395-9816 
+or by email at willgreat5@hotmail.com
+
+     Credits
+Special Thanks to Jonas Termansen and osdev.org
+
+This project is forked from the Meaty Skeleton written by Jonas Termansen
+To get the original Meaty Skeleton, you can go to
+https://gitlab.com/sortie/meaty-skeleton
+
+His website is http://maxsi.org/ 
+and he created the Sortix Operating System
