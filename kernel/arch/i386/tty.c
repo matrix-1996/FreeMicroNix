@@ -50,32 +50,33 @@ void terminal_clear(void)
 
 void terminal_scroll(void)
 {
-	for (int i = 0; i < VGA_HEIGHT; i++)
+	for (size_t y = 0; y < VGA_HEIGHT; y++)
 	{
-		for (int x = 0; x < VGA_WIDTH; x++)
+		for (size_t x = 0; x < VGA_WIDTH; x++)
 		{
-			terminal_buffer[i * VGA_WIDTH + x] = terminal_buffer[(i+1) * VGA_WIDTH + x];
+			terminal_buffer[y * VGA_WIDTH + x] = terminal_buffer[(y+1) * VGA_WIDTH + x];
 		}
+		for (size_t i = 0; i < VGA_WIDTH; i++)
+		{
+			terminal_putentryat(' ', terminal_color, i, VGA_HEIGHT);
+		}
+		terminal_row = VGA_HEIGHT-1;
+		terminal_column = 0;
 	}
-	/*
-	for ( int i = 0; i < VGA_WIDTH; i++)
-	{
-		terminal_putchar(' ');
-	} */
-	terminal_column = 0;
-	terminal_row = 0;
+
 }
 
 void terminal_putchar(char c)
 {
-	if (terminal_row == VGA_HEIGHT)
+
+	if (terminal_row >= VGA_HEIGHT)
 	{
 		terminal_scroll();
-	}
-
+	}	
+	
 	if (c == '\t')
 	{
-		for (int i = 0; i < 4; i++)
+		for (size_t i = 0; i < 4; i++)
 		{
 			terminal_putchar(' ');
 		}
