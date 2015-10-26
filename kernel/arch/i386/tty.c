@@ -10,6 +10,11 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
+
+/*
+This fcuntion 
+
+*/
 void terminal_initialize(void)
 {
 	terminal_row = 0;
@@ -31,12 +36,16 @@ void terminal_setcolor(uint8_t color)
 	terminal_color = color;
 }
 
+/* Calculates the position in the vga video buffer
+to write to. Then it calls make_vgaentry */
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 {
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = make_vgaentry(c, color);
 }
 
+
+// Clears the screen, and moves the text position to (0,0)
 void terminal_clear(void)
 {
 	for ( size_t y = 0; y < VGA_HEIGHT; y++ )
@@ -45,7 +54,9 @@ void terminal_clear(void)
 		{
 			terminal_putentryat(' ', terminal_color, x, y);
 		}
-	}	
+	}
+	terminal_row = 0;
+	terminal_column = 0;	
 }
 
 void terminal_scroll(void)
@@ -61,7 +72,7 @@ void terminal_scroll(void)
 			terminal_putentryat(' ', terminal_color, i, VGA_HEIGHT);
 		}
 		terminal_row = VGA_HEIGHT-1;
-		terminal_column = 0;
+		terminal_column = 1;
 	}
 
 }
@@ -73,7 +84,7 @@ void terminal_putchar(char c)
 	{
 		terminal_scroll();
 	}	
-	
+
 	if (c == '\t')
 	{
 		for (size_t i = 0; i < 4; i++)
@@ -91,7 +102,7 @@ void terminal_putchar(char c)
 
 	else 
 		{
-			terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+			terminal_putentryat(c, terminal_color, terminal_column -1, terminal_row);
 		}
 
 	if ( ++terminal_column == VGA_WIDTH )
