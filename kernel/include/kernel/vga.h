@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+enum video_type
+{
+    VIDEO_TYPE_NONE = 0x00,
+    VIDEO_TYPE_COLOUR = 0x20,
+    VIDEO_TYPE_MONOCHROME = 0x30,
+};
+
 enum vga_color
 {
 	COLOR_BLACK = 0,

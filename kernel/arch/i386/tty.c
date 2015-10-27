@@ -11,15 +11,41 @@ uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
 
-/*
-This fcuntion 
+// Returns a pointer the bios hardware information
+  uint16_t detect_bios_area_hardware(void)
+{
+    const uint16_t* bda_detected_hardware_ptr = (const uint16_t*) 0x410;
+    return *bda_detected_hardware_ptr;
+}
 
+// Returns the type of video hardwarea as defined in kernel/vga.h
+enum video_type get_bios_area_video_type(void)
+{
+    return (enum video_type) (detect_bios_area_hardware() & 0x30);
+}
+
+/*
+This function initializes the terminal
+It sets the position that text begins 
+at to (0,0)
+Then it checks for the type of video and sets the color accordingly
 */
 void terminal_initialize(void)
 {
 	terminal_row = 0;
 	terminal_column = 0;
-	terminal_color = make_color(COLOR_LIGHT_GREEN, COLOR_BLACK);
+
+	enum video_type terminal_videtotype = get_bios_area_video_type();
+	if (terminal_videtotype == VIDEO_TYPE_MONOCHROME )
+	{
+		terminal_color = make_color(COLOR_BLACK, COLOR_BLACK)
+	}
+	else if (terminal_vt == terminal_videtotype)
+	{
+			terminal_color = make_color(COLOR_LIGHT_GREY, COLOR_BLACK);
+	}
+	else terminal_color 
+	
 	terminal_buffer = VGA_MEMORY;
 	for ( size_t y = 0; y < VGA_HEIGHT; y++ )
 	{
