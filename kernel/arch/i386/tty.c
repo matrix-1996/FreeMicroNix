@@ -33,18 +33,18 @@ Then it checks for the type of video and sets the color accordingly
 void terminal_initialize(void)
 {
 	terminal_row = 0;
-	terminal_column = 0;
+	terminal_column = 1;
 
 	enum video_type terminal_videtotype = get_bios_area_video_type();
 	if (terminal_videtotype == VIDEO_TYPE_MONOCHROME )
 	{
-		terminal_color = make_color(COLOR_BLACK, COLOR_BLACK)
+		terminal_color = make_color(COLOR_BLACK, COLOR_BLACK);
 	}
-	else if (terminal_vt == terminal_videtotype)
+	else if (terminal_videtotype == terminal_videtotype)
 	{
 			terminal_color = make_color(COLOR_LIGHT_GREY, COLOR_BLACK);
 	}
-	else terminal_color 
+	else terminal_color = COLOR_LIGHT_GREY;
 	
 	terminal_buffer = VGA_MEMORY;
 	for ( size_t y = 0; y < VGA_HEIGHT; y++ )
@@ -85,6 +85,11 @@ void terminal_clear(void)
 	terminal_column = 0;	
 }
 
+/* Moves everything on the screen up a row
+discarding the first row and clearing the
+bottom row once what was there has been moved.
+Then the current row is set to 1 less than VGA_HEIGHT,
+and the current column is set to one */
 void terminal_scroll(void)
 {
 	for (size_t y = 0; y < VGA_HEIGHT; y++)

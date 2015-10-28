@@ -30,11 +30,28 @@ enum vga_color
 	COLOR_WHITE = 15,
 };
 
+/* Takes in the desired foreground
+and background color and does a logical 
+OR of the two values. Then the 
+resulting value is bitwise shifted to
+the left 4 place values. The resulting
+value is the raw binary representation
+of the combination of foreground and
+background colors. */
 static inline uint8_t make_color(enum vga_color fg, enum vga_color bg)
 {
 	return fg | bg << 4;
 }
 
+/* Takes in the ascii value of the 
+entered character, and the color that
+the character should appear as on the 
+screen. It does a logical OR on the 2
+values. The result of the operation is
+bitwise shifted over 8 place values.
+The resulting value is the raw binary
+representation of the color and ascii 
+value */
 static inline uint16_t make_vgaentry(char c, uint8_t color)
 {
 	uint16_t c16 = c;
@@ -42,9 +59,12 @@ static inline uint16_t make_vgaentry(char c, uint8_t color)
 	return c16 | color16 << 8;
 }
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
+static const size_t VGA_WIDTH = 80; // The standard height of a vga terminal
+static const size_t VGA_HEIGHT = 25; // The standard width of a vga terminal
 
+
+/* The address of the VGA Port's
+memory is set to 0xB8000 */
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
 #endif
