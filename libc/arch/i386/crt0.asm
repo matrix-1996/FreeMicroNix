@@ -1,8 +1,6 @@
-.intel_syntax noprefix
-
-.section .text
+section .text
  
-.global _start
+global _start
 _start:
 	mov ebp, 0
 	push ebp
