@@ -1,7 +1,7 @@
 HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
-
-AFLAGS=-felf32
+AS=nasm
+FLAGS=-f elf32
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
