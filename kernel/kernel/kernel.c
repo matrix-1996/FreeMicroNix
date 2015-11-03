@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-
+#include <kernel/timer.h>
+#include <kernel/descriptor_tables.h>
 #include <kernel/tty.h>
 
 void kernel_early(void)

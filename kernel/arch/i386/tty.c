@@ -146,7 +146,7 @@ void terminal_putchar(char c)
 	}
 }
 
-terminal_write_decimal(int d)
+void terminal_write_decimal(int d)
 {
 	terminal_putchar(itoa(d,10));
 }
