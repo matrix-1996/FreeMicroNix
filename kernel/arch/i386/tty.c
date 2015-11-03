@@ -148,7 +148,7 @@ void terminal_putchar(char c)
 
 terminal_write_decimal(int d)
 {
-	terminal_putchar(atoi(d));
+	terminal_putchar(itoa(d,10));
 }
 
 void terminal_write(const char* data, size_t size)

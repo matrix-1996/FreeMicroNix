@@ -5,7 +5,7 @@
 // This gets called from our ASM interrupt handler stub.
 void isr_handler(registers_t regs)
 {
-   printf("recieved interrupt: ");
+   terminal_writestring("recieved interrupt: ");
    terminal_write_decimal(regs.int_no);
    terminal_putchar('\n');
 } 
