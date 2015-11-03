@@ -12,5 +12,6 @@ void kernel_early(void)
 
 void kernel_main(void)
 {
+	init_descriptor_tables();
 	printf("FreeMicroNix\nVersion 0.01 Blue Panda\nCopyright 2015 William Taylor Jones\n");
 }
