@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef CRC32_H
+#define CRC32_H
 
 #include <sys/cdefs.h>
 #include <stdint.h>

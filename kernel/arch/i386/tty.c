@@ -85,6 +85,18 @@ void terminal_clear(void)
 	terminal_column = 0;	
 }
 
+
+void terminal_move_cursor(void)
+{
+	size_t cursorLocation = terminal_column * 80 + terminal_row;
+	outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
+    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
+    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
+    outb(0x3D5, cursorLocation);      // Send the low cursor byte.
+}
+
+
+
 /* Moves everything on the screen up a row
 discarding the first row and clearing the
 bottom row once what was there has been moved.
@@ -144,11 +156,80 @@ void terminal_putchar(char c)
 			terminal_row = 0;
 		}
 	}
+	terminal_move_cursor();
 }
 
-void terminal_write_decimal(int d)
+
+void terminal_write_hex(uint32_t n)
 {
-	terminal_putchar(itoa(d,10));
+    s32int tmp;
+
+    terminal_writestring("0x");
+
+    char noZeroes = 1;
+
+    int i;
+    for (i = 28; i > 0; i -= 4)
+    {
+        tmp = (n >> i) & 0xF;
+        if (tmp == 0 && noZeroes != 0)
+        {
+            continue;
+        }
+    
+        if (tmp >= 0xA)
+        {
+            noZeroes = 0;
+            terminal_putchar (tmp-0xA+'a' );
+        }
+        else
+        {
+            noZeroes = 0;
+            terminal_putchar( tmp+'0' );
+        }
+    }
+  
+    tmp = n & 0xF;
+    if (tmp >= 0xA)
+    {
+        terminal_putchar (tmp-0xA+'a');
+    }
+    else
+    {
+        terminal_putchar (tmp+'0');
+    }
+
+}
+
+
+
+void terminal_write_decimal(uint32_t n)
+{
+	 if (n == 0)
+    {
+        terminal_putchar('0');
+        return;
+    }
+
+    s32int acc = n;
+    char c[32];
+    int i = 0;
+    while (acc > 0)
+    {
+        c[i] = '0' + acc%10;
+        acc /= 10;
+        i++;
+    }
+    c[i] = 0;
+
+    char c2[32];
+    c2[i--] = 0;
+    int j = 0;
+    while(i >= 0)
+    {
+        c2[i--] = c[j++];
+    }
+    terminal_writestring(c2);
 }
 
 void terminal_write(const char* data, size_t size)
