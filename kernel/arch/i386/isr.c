@@ -16,6 +16,11 @@ void isr_handler(registers_t regs)
    terminal_writestring("recieved interrupt: ");
    terminal_write_decimal(regs.int_no);
    terminal_putchar('\n');
+    if (interrupt_handlers[regs.int_no] != 0)
+    {
+        isr_t handler = interrupt_handlers[regs.int_no];
+        handler(regs);
+    }
 }
 
 // This gets called from our ASM interrupt handler stub.

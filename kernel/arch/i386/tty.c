@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
+#include <kernel/common.h>
 #include <kernel/vga.h>
 
 size_t terminal_row;
@@ -88,7 +88,7 @@ void terminal_clear(void)
 
 void terminal_move_cursor(void)
 {
-	size_t cursorLocation = terminal_column * 80 + terminal_row;
+	size_t cursorLocation = terminal_row * 80 + terminal_column;
 	outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
     outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
     outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
@@ -104,13 +104,15 @@ Then the current row is set to 1 less than VGA_HEIGHT,
 and the current column is set to one */
 void terminal_scroll(void)
 {
-	for (size_t y = 0; y < VGA_HEIGHT; y++)
+	if  (terminal_row >= 25)
+
+	for (int y = 0; y < VGA_HEIGHT; y++)
 	{
-		for (size_t x = 0; x < VGA_WIDTH; x++)
+		for (int x = 0; x < VGA_WIDTH; x++)
 		{
 			terminal_buffer[y * VGA_WIDTH + x] = terminal_buffer[(y+1) * VGA_WIDTH + x];
 		}
-		for (size_t i = 0; i < VGA_WIDTH; i++)
+		for (int i = 0; i < VGA_WIDTH; i++)
 		{
 			terminal_putentryat(' ', terminal_color, i, VGA_HEIGHT);
 		}
@@ -123,46 +125,69 @@ void terminal_scroll(void)
 void terminal_putchar(char c)
 {
 
-	if (terminal_row >= VGA_HEIGHT)
-	{
-		terminal_scroll();
-	}	
+    // Handle a backspace, by moving the cursor back one space
+    if (c == '\b' && terminal_column)
+    {
+        terminal_column--;
+    }
 
-	if (c == '\t')
-	{
-		for (size_t i = 0; i < 4; i++)
-		{
-			terminal_putchar(' ');
-		}
-	}
+    // Handle a tab by increasing the cursor's X, but only to a point
+    // where it is divisible by 8.
+    else if (c == '\t')
+    {
+        terminal_column = (terminal_column+8) & ~(8-1);
+    }
 
-	else if (c == '\n')
-	{
-		terminal_column = 0;
-		terminal_row++;
+    // Handle carriage return
+    else if (c == '\r')
+    {
+        terminal_column = 0;
+    }
 
-	}
+    // Handle newline by moving cursor back to left and increasing the row
+    else if (c == '\n')
+    {
+        terminal_column = 0;
+        terminal_row++;
+    }
+    // Handle any other printable character.
+    else if(c >= ' ')
+    {
+    	terminal_putentryat(c, terminal_color, terminal_column -1, terminal_row);
+    	terminal_column++;
+    }
 
-	else 
-		{
-			terminal_putentryat(c, terminal_color, terminal_column -1, terminal_row);
-		}
+    // Check if we need to insert a new line because we have reached the end
+    // of the screen.
+    if (terminal_column >= VGA_HEIGHT)
+    {
+        terminal_column = 0;
+        terminal_row ++;
+    }
 
-	if ( ++terminal_column == VGA_WIDTH )
-	{
-		terminal_column = 0;
-		if ( ++terminal_row == VGA_HEIGHT )
-		{
-			terminal_row = 0;
-		}
-	}
-	terminal_move_cursor();
+    // Scroll the screen if needed.
+    terminal_scroll();
+    // Move the hardware cursor.
+    terminal_move_cursor();
+
+}
+
+
+void terminal_write(const char* data, size_t size)
+{
+	for ( size_t i = 0; i < size; i++ )
+		terminal_putchar(data[i]);
+}
+
+void terminal_writestring(const char* data)
+{
+	terminal_write(data, strlen(data));
 }
 
 
 void terminal_write_hex(uint32_t n)
 {
-    s32int tmp;
+    int32_t tmp;
 
     terminal_writestring("0x");
 
@@ -211,7 +236,7 @@ void terminal_write_decimal(uint32_t n)
         return;
     }
 
-    s32int acc = n;
+    int32_t acc = n;
     char c[32];
     int i = 0;
     while (acc > 0)
@@ -232,13 +257,3 @@ void terminal_write_decimal(uint32_t n)
     terminal_writestring(c2);
 }
 
-void terminal_write(const char* data, size_t size)
-{
-	for ( size_t i = 0; i < size; i++ )
-		terminal_putchar(data[i]);
-}
-
-void terminal_writestring(const char* data)
-{
-	terminal_write(data, strlen(data));
-}

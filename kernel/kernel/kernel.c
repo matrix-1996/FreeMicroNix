@@ -8,12 +8,14 @@
 
 void kernel_early(void)
 {
-	init_descriptor_tables();
-	terminal_initialize();
+	
 }
 
 void kernel_main(void)
 {
+	asm volatile ("cli");
+	init_descriptor_tables();
+	terminal_initialize();
 	printf("FreeMicroNix\nVersion 0.01 Blue Panda\nCopyright 2015 William Taylor Jones\n");
 	asm volatile ("int $0x3");
 	asm volatile ("int $0x4");
