@@ -1,7 +1,5 @@
 HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
-AS=nasm
-FLAGS=-f elf32
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -24,12 +22,13 @@ ARCHDIR:=arch/$(HOSTARCH)
 include $(ARCHDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
+CPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+LIBK_CPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS:=\
 $(ARCH_FREEOBJS) \
+init/__init_libc.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
@@ -39,10 +38,10 @@ string/memcpy.o \
 string/memmove.o \
 string/memset.o \
 string/strlen.o \
-string/itoa.o \
 
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \
+stdlib/exit.o \
 
 OBJS:=\
 $(FREEOBJS) \
@@ -50,7 +49,7 @@ $(HOSTEDOBJS) \
 
 LIBK_OBJS:=$(FREEOBJS:.o=.libk.o)
 
-BINARIES=libc.a libg.a libk.a
+BINARIES=libc.a libg.a libk.a $(ARCHDIR)/crt0.o $(ARCHDIR)/crti.o $(ARCHDIR)/crtn.o
 
 all: $(BINARIES)
 
@@ -68,13 +67,13 @@ libk.a: $(LIBK_OBJS)
 %.o: %.c
 	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
-%.o: %.asm
-	$(AS) $(AFLAGS) $< -o $@ 
+%.o: %.S
+	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 %.libk.o: %.c
 	$(CC) -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
-%.libk.o: %.asm
+%.libk.o: %.S
 	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
 clean:

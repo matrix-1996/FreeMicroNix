@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "idt.h"
+#include <i386/idt.h>
 
 #define IDT_TYPE_INTERRUPT 0xE /* Interrupts disabled in eflags. */
 #define IDT_TYPE_TRAP 0xF      /* Interrupts unaffected in eflags. */

@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "pic.h"
+#include <i386/pic.h>
 
 struct interrupt_context
 {

@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <kernel/common.h>
-#include <kernel/vga.h>
+#include <kernel/portio.h>
+#include <i386/vga.h>
 
 size_t terminal_row;
 size_t terminal_column;
@@ -33,7 +33,7 @@ Then it checks for the type of video and sets the color accordingly
 void terminal_initialize(void)
 {
 	terminal_row = 0;
-	terminal_column = 1;
+	terminal_column = 0;
 
 	enum video_type terminal_videtotype = get_bios_area_video_type();
 	if (terminal_videtotype == VIDEO_TYPE_MONOCHROME )
@@ -89,10 +89,10 @@ void terminal_clear(void)
 void terminal_move_cursor(void)
 {
 	size_t cursorLocation = terminal_row * 80 + terminal_column;
-	outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-    outb(0x3D5, cursorLocation);      // Send the low cursor byte.
+	outport8(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
+    outport8(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
+    outport8(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
+    outport8(0x3D5, cursorLocation);      // Send the low cursor byte.
 }
 
 
@@ -104,22 +104,24 @@ Then the current row is set to 1 less than VGA_HEIGHT,
 and the current column is set to one */
 void terminal_scroll(void)
 {
-	if  (terminal_row >= 25)
+	if  (terminal_column >= 25)
+    {
+        if (terminal_row >= VGA_HEIGHT)
+        {
+            int i;
+            for (i = 0 *VGA_WIDTH; i < 24*VGA_WIDTH; i++)
+            {
+                terminal_buffer[i] = terminal_buffer[i + VGA_WIDTH];
+            }
 
-	for (int y = 0; y < VGA_HEIGHT; y++)
-	{
-		for (int x = 0; x < VGA_WIDTH; x++)
-		{
-			terminal_buffer[y * VGA_WIDTH + x] = terminal_buffer[(y+1) * VGA_WIDTH + x];
-		}
-		for (int i = 0; i < VGA_WIDTH; i++)
-		{
-			terminal_putentryat(' ', terminal_color, i, VGA_HEIGHT);
-		}
-		terminal_row = VGA_HEIGHT-1;
-		terminal_column = 1;
+            for (i = 24 * VGA_WIDTH; i < VGA_HEIGHT * VGA_WIDTH; i++)
+            {
+                terminal_buffer[i] = ' ';
+            }
+
+            terminal_row = 24;
+        }
 	}
-
 }
 
 void terminal_putchar(char c)
@@ -153,13 +155,13 @@ void terminal_putchar(char c)
     // Handle any other printable character.
     else if(c >= ' ')
     {
-    	terminal_putentryat(c, terminal_color, terminal_column -1, terminal_row);
+    	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
     	terminal_column++;
     }
 
     // Check if we need to insert a new line because we have reached the end
     // of the screen.
-    if (terminal_column >= VGA_HEIGHT)
+    if (terminal_column >= VGA_WIDTH)
     {
         terminal_column = 0;
         terminal_row ++;
