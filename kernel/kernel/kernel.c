@@ -6,6 +6,7 @@
 #include <i386/idt.h>
 #include <i386/pic.h>
 
+
 void kernel_early(void)
 {
 	terminal_initialize();
