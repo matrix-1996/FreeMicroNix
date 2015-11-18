@@ -12,3 +12,4 @@
 #define CPUID_VENDOR_SIS          "SiS SiS SiS "
 #define CPUID_VENDOR_NSC          "Geode by NSC"
 #define CPUID_VENDOR_RISE         "RiseRiseRise"
+

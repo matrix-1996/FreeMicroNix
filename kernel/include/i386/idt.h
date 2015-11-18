@@ -1,6 +1,8 @@
 #ifndef _I386_IDT_H
 #define _I386_IDT_H
 
+
+
 void isr0();
 void isr1();
 void isr2();

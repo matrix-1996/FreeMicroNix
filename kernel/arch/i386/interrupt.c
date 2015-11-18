@@ -3,6 +3,8 @@
 
 #include <i386/pic.h>
 #include <i386/interrupt.h>
+#include <kernel/portio.h>
+#include <kernel/tty.h>
 
 void isr_handler(struct interrupt_context* int_ctx)
 {
@@ -12,6 +14,12 @@ void isr_handler(struct interrupt_context* int_ctx)
 void irq_handler(struct interrupt_context* int_ctx)
 {
 	uint8_t irq = int_ctx->int_no - 32;
+
+	terminal_writestring("Interrupt: ");
+	terminal_write_decimal(irq);
+	terminal_putchar('\n');
+
+	if (interrupt_context.int_no != )0
 
 	// Handle the potentially spurious interrupts IRQ 7 and IRQ 15.
 	if ( irq == 7 && !(pic_read_isr() & (1 << 7)) )
@@ -33,4 +41,11 @@ void interrupt_handler(struct interrupt_context* int_ctx)
 		isr_handler(int_ctx);
 	else if ( 32 <= int_ctx->int_no && int_ctx->int_no < 32 + 16 )
 		irq_handler(int_ctx);
+}
+
+isr_t interrupt_handlers[256];
+
+void register_interrupt_handler(uint8_t n, isr_t handler)
+{
+    interrupt_handlers[n] = handler;
 }
