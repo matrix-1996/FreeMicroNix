@@ -19,8 +19,6 @@ void irq_handler(struct interrupt_context* int_ctx)
 	terminal_write_decimal(irq);
 	terminal_putchar('\n');
 
-	if (interrupt_context.int_no != )0
-
 	// Handle the potentially spurious interrupts IRQ 7 and IRQ 15.
 	if ( irq == 7 && !(pic_read_isr() & (1 << 7)) )
 		return;
@@ -43,9 +41,3 @@ void interrupt_handler(struct interrupt_context* int_ctx)
 		irq_handler(int_ctx);
 }
 
-isr_t interrupt_handlers[256];
-
-void register_interrupt_handler(uint8_t n, isr_t handler)
-{
-    interrupt_handlers[n] = handler;
-}
