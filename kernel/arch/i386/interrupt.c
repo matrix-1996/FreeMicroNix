@@ -5,6 +5,8 @@
 #include <i386/interrupt.h>
 #include <kernel/portio.h>
 #include <kernel/tty.h>
+#include <i386/idt.h>
+#include <stdbool.h>
 
 
 struct interrupt_handler
