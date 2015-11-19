@@ -60,7 +60,7 @@ static void RegisterRawHandler(unsigned int index,
 	uint8_t flags = IDT::FLAG_PRESENT
 	              | type << IDT::FLAG_TYPE_SHIFT
 	              | rpl << IDT::FLAG_DPL_SHIFT;
-	IDT::SetEntry(&interrupt_table[index], handler_entry, selector, flags, ist);
+	SetEntry(&interrupt_table[index], handler_entry, selector, flags, ist);
 }
 
 
