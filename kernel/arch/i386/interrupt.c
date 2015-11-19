@@ -6,6 +6,63 @@
 #include <kernel/portio.h>
 #include <kernel/tty.h>
 
+
+struct interrupt_handler
+{
+	void (*handler)(struct interrupt_context*, void*);
+	void* context;
+	struct interrupt_handler* next;
+	struct interrupt_handler* prev;
+};
+
+static struct interrupt_handler* interrupt_handlers[NUM_INTERRUPTS];
+
+
+void RegisterHandler(unsigned int index, struct interrupt_handler* handler)
+{
+	assert(index < NUM_INTERRUPTS);
+	bool was_enabled = SetEnabled(false);
+	handler->prev = NULL;
+	if ( (handler->next = interrupt_handlers[index]) )
+		handler->next->prev = handler;
+	interrupt_handlers[index] = handler;
+	SetEnabled(was_enabled);
+}
+
+
+void UnregisterHandler(unsigned int index, struct interrupt_handler* handler)
+{
+	assert(index < NUM_INTERRUPTS);
+	bool was_enabled = SetEnabled(false);
+	if ( handler->prev )
+		handler->prev->next = handler->next;
+	else
+		interrupt_handlers[index] = handler->next;
+	if ( handler->next )
+		handler->next->prev = handler->prev;
+	SetEnabled(was_enabled);
+}
+
+
+static void RegisterRawHandler(unsigned int index,
+                               void (*handler)(void),
+                               bool userspace,
+                               bool preemptive)
+{
+	assert(index < NUM_INTERRUPTS);
+	addr_t handler_entry = (addr_t) handler;
+	uint16_t selector = KCS;
+	uint8_t rpl = userspace ? URPL : KRPL;
+	uint8_t type = preemptive ? IDT::TYPE_TRAP : IDT::TYPE_INTERRUPT;
+	uint8_t ist = 0;
+	uint8_t flags = IDT::FLAG_PRESENT
+	              | type << IDT::FLAG_TYPE_SHIFT
+	              | rpl << IDT::FLAG_DPL_SHIFT;
+	IDT::SetEntry(&interrupt_table[index], handler_entry, selector, flags, ist);
+}
+
+
+
 void isr_handler(struct interrupt_context* int_ctx)
 {
 	(void) int_ctx;
@@ -39,12 +96,4 @@ void interrupt_handler(struct interrupt_context* int_ctx)
 		isr_handler(int_ctx);
 	else if ( 32 <= int_ctx->int_no && int_ctx->int_no < 32 + 16 )
 		irq_handler(int_ctx);
-}
-
-
-isr_t interrupt_handlers[256];
-
-void register_interrupt_handler(uint8_t n, isr_t handler)
-{
-    interrupt_handlers[n] = handler;
 }
