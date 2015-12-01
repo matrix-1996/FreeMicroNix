@@ -1,7 +1,7 @@
 #ifndef _VGA_H
 #define _VGA_H
 
-#include <stdint.h>
+#include <i386/global.h>
 
 enum video_type
 {

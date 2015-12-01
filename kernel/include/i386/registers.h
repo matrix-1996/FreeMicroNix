@@ -1,7 +1,6 @@
 #ifndef _I386_REGISTERS_H
 #define _I386_REGISTERS_H
 
-#include <stdint.h>
 
 const size_t FLAGS_CARRY        = 1 << 0; // 0x000001
 const size_t FLAGS_RESERVED1    = 1 << 1; // 0x000002, read as one
@@ -27,26 +26,25 @@ const size_t FLAGS_ID           = 1 << 21; // 0x200000
 
 struct interrupt_context
 {
-	uint32_t signal_pending;
-	uint32_t kerrno;
-	uint32_t cr2;
-	uint32_t ds;
-	uint32_t edi;
-	uint32_t esi;
-	uint32_t ebp;
-	uint32_t not_esp;
-	uint32_t ebx;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t eax;
-	uint32_t int_no;
-	uint32_t err_code;
-	uint32_t eip;
-	uint32_t cs;
-	uint32_t eflags;
-	uint32_t esp;
-	uint32_t ss;
+	unsigned int signal_pending;
+	unsigned int kerrno;
+	unsigned int cr2;
+	unsigned int ds;
+	unsigned int edi;
+	unsigned int esi;
+	unsigned int ebp;
+	unsigned int not_esp;
+	unsigned int ebx;
+	unsigned int edx;
+	unsigned int ecx;
+	unsigned int eax;
+	unsigned int int_no;
+	unsigned int err_code;
+	unsigned int eip;
+	unsigned int cs;
+	unsigned int eflags;
+	unsigned int esp;
+	unsigned int ss;
 };
-
 
 #endif

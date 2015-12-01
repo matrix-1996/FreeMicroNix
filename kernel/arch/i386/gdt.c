@@ -1,90 +1,94 @@
-#include <stdint.h>
+#include <i386/global.h>
+#include <i386/gdt.h>
+#include <i386/mm.h>
 
-struct tss_entry
-{
-	uint32_t prev_tss;
-	uint32_t esp0;
-	uint32_t ss0;
-	uint32_t esp1;
-	uint32_t ss1;
-	uint32_t esp2;
-	uint32_t ss2;
-	uint32_t cr3;
-	uint32_t eip;
-	uint32_t eflags;
-	uint32_t eax;
-	uint32_t ecx;
-	uint32_t edx;
-	uint32_t ebx;
-	uint32_t esp;
-	uint32_t ebp;
-	uint32_t esi;
-	uint32_t edi;
-	uint32_t es;
-	uint32_t cs;
-	uint32_t ss;
-	uint32_t ds;
-	uint32_t fs;
-	uint32_t gs;
-	uint32_t ldt;
-	uint16_t trap;
-	uint16_t iomap_base;
-};
+gdt_entry gdt[GDT_ENTRIES];
+gdtr_entry gdtr;
 
-struct tss_entry tss =
-{
-	.ss0 = 0x10 /* Kernel Data Segment */,
-	.esp0 = 0,
-	.es = 0x10 /* Kernel Data Segment */,
-	.cs = 0x08 /* Kernel Code Segment */,
-	.ds = 0x13 /* Kernel Data Segment */,
-	.fs = 0x13 /* Kernel Data Segment */,
-	.gs = 0x13 /* Kernel Data Segment */,
-};
+bool gdt_used[GDT_ENTRIES / 2] = {false};
+unsigned short gdt_kernel_cs;
+unsigned short gdt_user_cs;
+unsigned short gdt_user_tss = 0x33;		// We're safe to use 0x33 here since gdt_add_selector handles the offset.
 
-// TODO: Magic values ohoy! Fix that.
+tss_entry tss;
 
-#define GRAN_64_BIT_MODE (1 << 5)
-#define GRAN_32_BIT_MODE (1 << 6)
-#define GRAN_4KIB_BLOCKS (1 << 7)
+page_directory* paging_kernel_directory;
+page_directory* paging_current_directory;
 
-struct gdt_entry
-{
-	uint16_t limit_low;
-	uint16_t base_low;
-	uint8_t base_middle;
-	uint8_t access;
-	uint8_t granularity;
-	uint8_t base_high;
-};
+unsigned int* paging_frames;
+unsigned int paging_nframes;
 
-#define GDT_ENTRY(base, limit, access, granularity) \
-	{ (limit) & 0xFFFF,                                /* limit_low */ \
-	  (base) >> 0 & 0xFFFF,                            /* base_low */ \
-	  (base) >> 16 & 0xFF,                             /* base_middle */ \
-	  (access) & 0xFF,                                 /* access */ \
-	  ((limit) >> 16 & 0x0F) | ((granularity) & 0xF0), /* granularity */ \
-	  (base) >> 24 & 0xFF,                             /* base_high */ }
+void gdt_reload_tr(void) {
+	asm volatile ("ltr %%ax" : : "a"(gdt_user_tss));
+}
 
-struct gdt_entry gdt[] =
-{
-	/* 0x00: Null segment */
-	GDT_ENTRY(0, 0, 0, 0),
+void gdt_initialize(void) {
+	gdtr.base = (unsigned int)gdt;
+	gdtr.limit = GDT_ENTRIES * 8;
+	
+	gdt_add_selector(0x00, 0, 0, 0, 0);			// Selector 0x00 is always unused according to Intel
+	gdt_add_selector(0x08, 0, 0, 0, 0);			// For us, 0x08 is the same.
+	gdt_used[0] = true;
 
-	/* 0x08: Kernel Code Segment. */
-	GDT_ENTRY(0, 0xFFFFFFFF, 0x9A, GRAN_32_BIT_MODE | GRAN_4KIB_BLOCKS),
+	gdt_kernel_cs = gdt_add_task(0, 0xFFFFF, true);		// Should, under most circumstances, be 0x10
+	gdt_user_cs = gdt_add_task(0, 0xFFFFF, false);		// Should, under most circumstances, be 0x20
+	
+	gdt_add_selector(gdt_user_tss, (unsigned int)&tss, sizeof(tss)-1, 0xE9, 0x40);
+	memset(&tss, 0, sizeof(tss));
+	
+	tss.ss0  = gdt_kernel_cs+0x08;		// Kernel SS
+	tss.esp0 = 0;	// Kernel ESP
+	tss.cs = gdt_kernel_cs | 0x3;
+	tss.ss = tss.ds = tss.es = tss.fs = tss.gs = (gdt_kernel_cs+0x08) | 0x3;
+	gdt_used[3] = true;		// Lock this down.
 
-	/* 0x10: Kernel Data Segment. */
-	GDT_ENTRY(0, 0xFFFFFFFF, 0x92, GRAN_32_BIT_MODE | GRAN_4KIB_BLOCKS),
+	gdt_reload();	// PRAY IT DON'T GO BOOM
+	gdt_reload_tr();
+}
 
-	/* 0x18: User Code Segment. */
-	GDT_ENTRY(0, 0xFFFFFFFF, 0xFA, GRAN_32_BIT_MODE | GRAN_4KIB_BLOCKS),
+void gdt_add_selector(int offset, unsigned int base, unsigned int limit, unsigned char access, unsigned char flags) {
+	gdt[(offset/0x08)].limit_0_15 = (unsigned short)(limit);
+	gdt[(offset/0x08)].base_0_15 = (unsigned short)(base & 0xFFFF);
+	gdt[(offset/0x08)].base_16_23 = (unsigned char)((base >> 16) & 0xFF);
+	gdt[(offset/0x08)].access = access;
+	gdt[(offset/0x08)].flags = flags;
+	gdt[(offset/0x08)].base_24_31 = (unsigned char)((base >> 24) & 0xFF);
+}
 
-	/* 0x20: User Data Segment. */
-	GDT_ENTRY(0, 0xFFFFFFFF, 0xF2, GRAN_32_BIT_MODE | GRAN_4KIB_BLOCKS),
+unsigned short gdt_add_task(unsigned int base, unsigned int limit, bool kernel_mode) {
+	unsigned short ret = 0;
+	for (int i = 0; i < GDT_ENTRIES / 2; i++) {
+		if (!gdt_used[i]) {
+			gdt_used[i] = true;
+			if (kernel_mode) {
+				gdt_add_selector(i * 0x10, base, limit & 0xFFFFF, 0x9A, 0xCF);
+				gdt_add_selector(i * 0x10 + 0x08, base, limit & 0xFFFFF, 0x92, 0xCF);
+			} else {
+				gdt_add_selector(i * 0x10, base, limit & 0xFFFFF, 0xFA, 0xCF);
+				gdt_add_selector(i * 0x10 + 0x08, base, limit & 0xFFFFF, 0xF2, 0xCF);
+			}
+			ret = i * 0x10;
+			break;
+		}
+	}
+	
+	return ret;
+}
 
-	/* 0x28: Task Switch Segment. */
-	GDT_ENTRY(0 /*((uintptr_t) &tss)*/, sizeof(tss) - 1, 0xE9, 0x00),
-};
+void* tss_get_esp0(void) {
+	return (void*)tss.esp0;
+}
 
-uint16_t gdt_size_minus_one = sizeof(gdt) - 1;
+void tss_set_esp0(void* new_esp0) {
+	tss.esp0 = (unsigned int) new_esp0;
+}
+
+void paging_set_directory(page_directory* directory) {
+	paging_current_directory = directory;
+	asm volatile ("mov %0, %%cr3\n"
+				  "mov %%cr0, %%eax\n"
+				  "orl $0x80000000, %%eax\n"
+				  "mov %%eax, %%cr0\n"
+				  :: "r"(directory->phys_addr)
+				  : "%eax");
+}

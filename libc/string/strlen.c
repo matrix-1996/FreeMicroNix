@@ -1,9 +1,7 @@
 #include <string.h>
 
-size_t strlen(const char* string)
-{
-	size_t result = 0;
-	while ( string[result] )
-		result++;
-	return result;
+size_t strlen(const char *s) {
+	size_t i;
+	for (i = 0; s[i] != '\0'; i++) ;
+	return i;
 }

@@ -33,11 +33,34 @@ stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
 stdlib/abort.o \
+stdlib/abs.o \
+stdlib/atoi.o \
+stdlib/exit.o \
+stdlib/itoa.o \
+stdlib/i64toa.o \
+stdlib/strreverse.o \
+stdlib/u64toa.o \
+stdlib/uitoa.o \
+string/lfind.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \
 string/memset.o \
+string/strcat.o \
+string/strchr.o \
+string/strcmp.o \
+string/strcpy.o \
+string/strcspn.o \
+string/strdup.o \
 string/strlen.o \
+string/strncpy.o \
+string/strpbrk.o \
+string/strspn.o \
+string/strstr.o \
+string/strtok.o \
+string/strtok_r.o \
+
+
 
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \

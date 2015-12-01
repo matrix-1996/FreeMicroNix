@@ -1,13 +1,11 @@
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
+#include <i386/kprintf.h>
 #include <kernel/tty.h>
-#include <i386/idt.h>
-#include <i386/pic.h>
-#include <i386/pit_init.h>
+#include <i386/global.h>
+#include <i386/gdt.h>
 #include <i386/interrupt.h>
-
+#include <i386/rtc.h>
+#include <i386/mm.h>
+#include <i386/timer.h>
 
 void kernel_early(void)
 {
@@ -16,8 +14,10 @@ void kernel_early(void)
 
 void kernel_main(void)
 {
-	printf("FreeMicroNix\nVersion 0.01 Blue Panda\nCopyright 2015 William Taylor Jones\n");
+	kprintf("FreeMicroNix\nVersion 0.02 Green Tiger\nCopyright 2015 William Taylor Jones\n");
+	gdt_initialize();
 	idt_initialize();
-	pic_initialize();
-	init_pit(100);
+	timer_initialize(100, true);
+	EnableInterrupts();
+	rtc_initialize();
 }

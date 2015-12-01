@@ -1,6 +1,9 @@
 HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
+AS=nasm
+AFLAGS=-f elf32
+
 CFLAGS?=-O2 -g
 CPPFLAGS?=
 LDFLAGS?=
@@ -58,8 +61,8 @@ myos.kernel: $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld
 %.o: %.c
 	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
-%.o: %.S
-	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+%.o: %.asm
+	$(AS) $(AFLAGS) $< -o $@
 
 clean:
 	rm -f myos.kernel $(OBJS) $(ALL_OUR_OBJS) *.o */*.o */*/*.o

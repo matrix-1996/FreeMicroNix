@@ -1,8 +1,4 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <kernel/portio.h>
+#include <i386/global.h>
 #include <i386/vga.h>
 
 size_t terminal_row;
@@ -89,10 +85,10 @@ void terminal_clear(void)
 void terminal_move_cursor(void)
 {
 	size_t cursorLocation = terminal_row * 80 + terminal_column;
-	outport8(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-    outport8(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-    outport8(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-    outport8(0x3D5, cursorLocation);      // Send the low cursor byte.
+	outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
+    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
+    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
+    outb(0x3D5, cursorLocation);      // Send the low cursor byte.
 }
 
 
@@ -108,7 +104,7 @@ void terminal_scroll(void)
     {
         if (terminal_row >= VGA_HEIGHT)
         {
-            int i;
+            size_t i;
             for (i = 0 *VGA_WIDTH; i < 24*VGA_WIDTH; i++)
             {
                 terminal_buffer[i] = terminal_buffer[i + VGA_WIDTH];
@@ -187,9 +183,9 @@ void terminal_writestring(const char* data)
 }
 
 
-void terminal_write_hex(uint32_t n)
+void terminal_write_hex(unsigned int n)
 {
-    int32_t tmp;
+    int tmp;
 
     terminal_writestring("0x");
 
@@ -230,7 +226,7 @@ void terminal_write_hex(uint32_t n)
 
 
 
-void terminal_write_decimal(uint32_t n)
+void terminal_write_decimal(unsigned int n)
 {
 	 if (n == 0)
     {
@@ -238,7 +234,7 @@ void terminal_write_decimal(uint32_t n)
         return;
     }
 
-    int32_t acc = n;
+    unsigned int acc = n;
     char c[32];
     int i = 0;
     while (acc > 0)
