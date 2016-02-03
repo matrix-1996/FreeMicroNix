@@ -1,0 +1,26 @@
+Build Instructions:
+
+Prior to building, make sure you have followed the
+instructions in Dependancies.txt
+
+Step 1) Setting up enviornment Variables
+	A) Copy and paste the following into a terminal:
+
+	export PREFIX="$HOME/opt/cross"
+	export TARGET=i686-elf
+	export PATH="$PREFIX/bin:$PATH"
+
+Step 2) Clean the old build
+	A) Change directory to the freemicronix project root
+	B) ./clean.sh
+
+Step 3) Installing the headers
+	A) ./headers.sh
+
+Step 4) Building the OS and ISO
+	A) ./iso.sh
+
+Step 5) Testing the OS
+	A) ./qemu.sh
+	B) You may now use the operating system 
+	in the qemu window
