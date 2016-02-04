@@ -6,7 +6,7 @@ mkdir -p isodir
 mkdir -p isodir/boot
 mkdir -p isodir/boot/grub
 
-cp sysroot/boot/freemicronix.kernel isodir/boot/myos.kernel
+cp sysroot/boot/freemicronix.kernel isodir/boot/freemicronix.kernel
 cat > isodir/boot/grub/grub.cfg << EOF
 menuentry "freemicronix" {
 	multiboot /boot/freemicronix.kernel

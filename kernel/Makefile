@@ -2,9 +2,9 @@ HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
 AS=nasm
-AFLAGS=-f elf32
+AFLAGS=-f elf32 
 
-CFLAGS?=-O2 -g
+CFLAGS?=-O2 -g -std=gnu11 
 CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
@@ -24,14 +24,15 @@ ARCHDIR:=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
-OBJS:=\
-$(KERNEL_ARCH_OBJS) \
-kmain.o \
-
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
+
+OBJS:=\
+$(KERNEL_ARCH_OBJS) \
+loader.o \
+kmain.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
@@ -56,7 +57,7 @@ all: freemicronix.kernel
 .PHONY: all clean install install-headers install-kernel
 
 freemicronix.kernel: $(OBJ_LINK_LIST) link.ld
-			$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(OBJ_LINK_LIST) $(LDFLAGS) $(LIBS)
+			$(CC) -T link.ld -o $@ $(CFLAGS) $(OBJ_LINK_LIST) $(LDFLAGS) $(LIBS)
 %.o: %.c
 	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
