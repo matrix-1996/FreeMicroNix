@@ -1,3 +1,5 @@
+extern kmain, _init, gdt_size_minus_one, gdt, tss
+
 MBALIGN     equ  1<<0                  
 MEMINFO     equ  1<<1
 FLAGS       equ  MBALIGN | MEMINFO
@@ -23,13 +25,40 @@ section .text
 align 4
 global loader
 loader:
-	mov esp, kstack + KSTACK_SIZE				; point esp to the start of the
-												; kernel's stack
-	extern _init
+	mov esp, kstack + KSTACK_SIZE				; point esp to the start of the kernel's stack
+	
+	mov ecx, tss
+	mov [gdt + 0x28 + 2], cx
+	shr ecx, 16
+	mov [gdt + 0x28 + 4], cl
+	shr ecx, 8
+	mov [gdt + 0x28 + 7], cl
+
+	sub esp, 6
+	mov cx, [gdt_size_minus_one]
+	mov [esp], cx
+	mov ecx, gdt
+	mov [esp+2], ecx
+	lgdt [esp]
+	add esp, 6
+
+	push 0x08
+	push 0x1f
+
+	mov cx, 0x10
+	mov ds, cx
+	mov es, cx
+	mov fs, cx
+	mov gs, ax
+	mov ss, cx
+	
+	mov cx, [0x2b]
+	ltr cx
+
 	call _init
-	extern kmain								; inform the loader of the kmain function
 	call kmain									; call the kmain function
 	cli
 .hang:
 	hlt
 	jmp .hang
+

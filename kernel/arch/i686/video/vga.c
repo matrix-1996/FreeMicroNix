@@ -2,6 +2,7 @@
 #include <io.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 unsigned int terminal_row;
 unsigned int terminal_column;

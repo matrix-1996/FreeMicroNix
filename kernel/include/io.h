@@ -46,4 +46,6 @@ static inline unsigned int ind(unsigned short port)
 	return result;
 }
 
+
+
 #endif

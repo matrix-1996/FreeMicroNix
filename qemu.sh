@@ -2,4 +2,4 @@
 set -e
 . ./iso.sh
 
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom freemicronix.iso
+qemu-system-i386 -cdrom freemicronix.iso
