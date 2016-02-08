@@ -1,5 +1,3 @@
-extern kmain, _init, gdt_size_minus_one, gdt, tss
-
 MBALIGN     equ  1<<0                  
 MEMINFO     equ  1<<1
 FLAGS       equ  MBALIGN | MEMINFO
@@ -15,19 +13,20 @@ align 4
 	dd CHECKSUM
 
 
-section .bootstrap_stack, nobits											; align at 4 bytes
+section .bootstrap_stack, nobits
 align 4
-kstack:											; label points to beginning of memory
-resb KSTACK_SIZE								; reserve stack for the kernel
-
+stack_bottom:
+resb 16384
+stack_top:
 
 section .text
 align 4
 global loader
 loader:
-	mov esp, kstack + KSTACK_SIZE				; point esp to the start of the kernel's stack
-	
+	mov esp, stack_top				; point esp to the start of the kernel's stack
+	extern tss
 	mov ecx, tss
+	extern gdt
 	mov [gdt + 0x28 + 2], cx
 	shr ecx, 16
 	mov [gdt + 0x28 + 4], cl
@@ -35,6 +34,7 @@ loader:
 	mov [gdt + 0x28 + 7], cl
 
 	sub esp, 6
+	extern gdt_size_minus_one
 	mov cx, [gdt_size_minus_one]
 	mov [esp], cx
 	mov ecx, gdt
@@ -54,8 +54,9 @@ loader:
 	
 	mov cx, [0x2b]
 	ltr cx
-
+	extern _init
 	call _init
+	extern kmain
 	call kmain									; call the kmain function
 	cli
 .hang:
