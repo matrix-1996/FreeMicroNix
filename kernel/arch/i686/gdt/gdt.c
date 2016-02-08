@@ -83,3 +83,8 @@ struct gdt_entry gdt[] =
 };
 
 unsigned short gdt_size_minus_one = sizeof(gdt) - 1;
+
+void loadGDT()
+{
+	setGdt(gdt, gdt_size_minus_one); 
+}
