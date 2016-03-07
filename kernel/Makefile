@@ -1,3 +1,8 @@
+# This makefile is configured for an i686 Build
+# Please Reconfigure for an amd64 Build
+
+
+define x86
 HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
@@ -20,8 +25,13 @@ CPPFLAGS:=$(CPPFLAGS) -D__is_freemicronix_kernel -Iinclude
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
-ARCHDIR:=arch/$(HOSTARCH)
+ARCHDIR:=$(HOSTARCH)
+X86DIR:=x86
 
+# Include the following line for an i686 or amd64 Build
+include $(X86DIR)/make.config
+
+# The following line is always included
 include $(ARCHDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)

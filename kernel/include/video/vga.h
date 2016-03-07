@@ -1,5 +1,5 @@
-#ifndef INCLUDE_VIDEO_VGA_H
-#define INCLUDE_VIDEO_VGA_H
+#ifndef _VIDEO_VGA_H
+#define _VIDEO_VGA_H
 #include <stdint.h>
 #include <stddef.h>
 
