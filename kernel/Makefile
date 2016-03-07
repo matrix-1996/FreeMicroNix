@@ -27,12 +27,15 @@ LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 ARCHDIR:=$(HOSTARCH)
 X86DIR:=x86
+KERNELDIR:=kernel
 
 # Include the following line for an i686 or amd64 Build
 include $(X86DIR)/make.config
 
-# The following line is always included
+# The following lines are always included
 include $(ARCHDIR)/make.config
+include $(KERNELDIR)/make.config
+
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
@@ -42,7 +45,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 loader.o \
-kmain.o \
+kernel.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)

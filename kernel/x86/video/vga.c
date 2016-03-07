@@ -4,15 +4,15 @@
 #include <stddef.h>
 #include <string.h>
 
-unsigned int terminal_row;
-unsigned int terminal_column;
-unsigned char terminal_color;
-unsigned short* terminal_buffer;
+uint32_t terminal_row;
+uint32_t terminal_column;
+uint8_t terminal_color;
+uint16_t* terminal_buffer;
 
 // Returns a pointer the bios hardware information
-  unsigned short detect_bios_area_hardware(void)
+  uint16_t detect_bios_area_hardware(void)
 {
-    const unsigned short* bda_detected_hardware_ptr = (const unsigned short*) 0x410;
+    const uint16_t* bda_detected_hardware_ptr = (const uint16_t*) 0x410;
     return *bda_detected_hardware_ptr;
 }
 
@@ -48,11 +48,11 @@ void init_terminal(void)
 	
 	terminal_buffer = VGA_MEMORY;
 
-	for ( unsigned int y = 0; y < VGA_HEIGHT; y++ )
+	for ( uint32_t y = 0; y < VGA_HEIGHT; y++ )
 	{
-		for ( unsigned int x = 0; x < VGA_WIDTH; x++ )
+		for ( uint32_t x = 0; x < VGA_WIDTH; x++ )
 		{
-			const unsigned int index = y * VGA_WIDTH + x;
+			const uint32_t index = y * VGA_WIDTH + x;
 			terminal_buffer[index] = make_vgaentry(' ', terminal_color);
 		}
 	}
@@ -69,15 +69,15 @@ void set_terminal_color(enum vga_color color)
 
 /* Calculates the position in the vga video buffer
 to write to. Then it calls make_vgaentry */
-void terminal_raw_putchar(char c, unsigned char color, unsigned int x, unsigned int y)
+void terminal_raw_putchar(char c, uint8_t color, uint32_t x, uint32_t y)
 {
-	const unsigned int index = y * VGA_WIDTH + x;
+	const uint32_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = make_vgaentry(c, color);
 }
 
 void move_terminal_cursor(void)
 {
-	unsigned int cursorLocation = terminal_row * 80 + terminal_column;
+	uint32_t cursorLocation = terminal_row * 80 + terminal_column;
 	outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
     outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
     outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
@@ -88,9 +88,9 @@ void move_terminal_cursor(void)
 // Clears the screen, and moves the text position to (0,0)
 void clear_terminal(void)
 {
-	for ( unsigned int y = 0; y < VGA_HEIGHT; y++ )
+	for ( uint32_t y = 0; y < VGA_HEIGHT; y++ )
 	{
-		for ( unsigned int x = 0; x < VGA_WIDTH; x++ )
+		for ( uint32_t x = 0; x < VGA_WIDTH; x++ )
 		{
 			terminal_raw_putchar(' ', terminal_color, x, y);
 		}
@@ -111,7 +111,7 @@ void scroll_terminal(void)
     {
         if (terminal_row >= VGA_HEIGHT)
         {
-            unsigned int i;
+            uint32_t i;
             for (i = 0 *VGA_WIDTH; i < 24*VGA_WIDTH; i++)
             {
                 terminal_buffer[i] = terminal_buffer[i + VGA_WIDTH];
@@ -155,7 +155,7 @@ void terminal_putchar(char c)
         terminal_column = 0;
         terminal_row++;
     }
-    // Handle any other printable character.
+    // Handle any other kprintfable character.
     else if(c >= ' ')
     {
     	terminal_raw_putchar(c, terminal_color, terminal_column, terminal_row);
@@ -178,9 +178,9 @@ void terminal_putchar(char c)
 }
 
 
-void terminal_write(const char* data, unsigned int size)
+void terminal_write(const char* data, uint32_t size)
 {
-	for ( unsigned int i = 0; i < size; i++ )
+	for ( uint32_t i = 0; i < size; i++ )
 		terminal_putchar(data[i]);
 }
 
@@ -191,72 +191,100 @@ void terminal_writestring(const char* data)
 }
 
 
-void terminal_write_hex(unsigned int n)
+void kprintf(const char *s, ...)
 {
-    int tmp;
+    va_list ap;
 
-    terminal_writestring("0x");
+    char buf[16];
+    int i, j, size, buflen, neg;
 
-    char noZeroes = 1;
+    uint8_t c;
+    int ival;
+    uint32_t uival;
 
-    int i;
-    for (i = 28; i > 0; i -= 4)
-    {
-        tmp = (n >> i) & 0xF;
-        if (tmp == 0 && noZeroes != 0)
-        {
-            continue;
-        }
-    
-        if (tmp >= 0xA)
-        {
-            noZeroes = 0;
-            terminal_putchar (tmp-0xA+'a' );
-        }
-        else
-        {
-            noZeroes = 0;
-            terminal_putchar( tmp+'0' );
-        }
+    va_start(ap, s);
+
+    while ((c = *s++)) {
+        size = 0;
+        neg = 0;
+
+        if (c == 0)
+            break;
+        else if (c == '%') {
+            c = *s++;
+            if (c >= '0' && c <= '9') {
+                size = c - '0';
+                c = *s++;
+            }
+
+            if (c == 'd') {
+                ival = va_arg(ap, int);
+                if (ival < 0) {
+                    uival = 0 - ival;
+                    neg++;
+                } else
+                    uival = ival;
+                itoa(buf, uival, 10);
+
+                buflen = strlen(buf);
+                if (buflen < size)
+                    for (i = size, j = buflen; i >= 0;
+                         i--, j--)
+                        buf[i] =
+                            (j >=
+                             0) ? buf[j] : '0';
+
+                if (neg)
+                    kprintf("-%s", buf);
+                else
+                    kprintf(buf);
+            }
+             else if (c == 'u') {
+                uival = va_arg(ap, int);
+                itoa(buf, uival, 10);
+
+                buflen = strlen(buf);
+                if (buflen < size)
+                    for (i = size, j = buflen; i >= 0;
+                         i--, j--)
+                        buf[i] =
+                            (j >=
+                             0) ? buf[j] : '0';
+
+                kprintf(buf);
+            } else if (c == 'x' || c == 'X') {
+                uival = va_arg(ap, int);
+                itoa(buf, uival, 16);
+
+                buflen = strlen(buf);
+                if (buflen < size)
+                    for (i = size, j = buflen; i >= 0;
+                         i--, j--)
+                        buf[i] =
+                            (j >=
+                             0) ? buf[j] : '0';
+
+                kprintf("0x%s", buf);
+            } else if (c == 'p') {
+                uival = va_arg(ap, int);
+                itoa(buf, uival, 16);
+                size = 8;
+
+                buflen = strlen(buf);
+                if (buflen < size)
+                    for (i = size, j = buflen; i >= 0;
+                         i--, j--)
+                        buf[i] =
+                            (j >=
+                             0) ? buf[j] : '0';
+
+                kprintf("0x%s", buf);
+            } else if (c == 's') {
+                kprintf((char *) va_arg(ap, int));
+            } 
+        } else
+            terminal_writestring(c);
     }
-  
-    tmp = n & 0xF;
-    if (tmp >= 0xA)
-    {
-        terminal_putchar (tmp-0xA+'a');
-    }
-    else
-    {
-        terminal_putchar (tmp+'0');
-    }
 
-}
-
-void terminal_write_decimal(unsigned int n)
-{
-	 if (n == 0)
-    {
-        terminal_putchar('0');
-        return;
-    }
-
-    unsigned int acc = n;
-    char c[32];
-    int i = 0;
-    while (acc > 0)
-    {
-        c[i] = '0' + acc%10;
-        acc /= 10;
-        i++;
-    }
-    c[i] = 0;
-
-    char c2[32];
-    c2[i--] = 0;
-    int j = 0;
-    while(i >= 0)
-    {
-        c2[i--] = c[j++];
-    }
-    terminal_writestring(c2);
+    return;
 }

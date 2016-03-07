@@ -1,5 +1,5 @@
-#ifndef _VIDEO_VGA_H
-#define _VIDEO_VGA_H
+#ifndef _X86_VIDEO_VGA_H
+#define _X86_VIDEO_VGA_H
 #include <stdint.h>
 #include <stddef.h>
 
@@ -38,7 +38,7 @@ the left 4 place values. The resulting
 value is the raw binary representation
 of the combination of foreground and
 background colors. */
-static inline unsigned char make_color(enum vga_color fg, enum vga_color bg)
+static inline uint8_t make_color(enum vga_color fg, enum vga_color bg)
 {
 	return fg | bg << 4;
 }
@@ -52,33 +52,34 @@ bitwise shifted over 8 place values.
 The resulting value is the raw binary
 representation of the color and ascii 
 value */
-static inline unsigned short make_vgaentry(char c, unsigned char color)
+static inline uint16_t make_vgaentry(char c, uint8_t color)
 {
-	unsigned short c16 = c;
-	unsigned short color16 = color;
+	uint16_t c16 = c;
+	uint16_t color16 = color;
 	return c16 | color16 << 8;
 }
 
-static const unsigned int VGA_WIDTH = 80; // The standard height of a vga terminal
-static const unsigned int VGA_HEIGHT = 25; // The standard width of a vga terminal
+static const uint32_t VGA_WIDTH = 80; // The standard height of a vga terminal
+static const uint32_t VGA_HEIGHT = 25; // The standard width of a vga terminal
 
 
 /* The address of the VGA Port's
 memory is set to 0xB8000 */
-static unsigned short* const VGA_MEMORY = (unsigned short*) 0xB8000;
+static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
-unsigned short detect_bios_area_hardware(void);
+uint16_t detect_bios_area_hardware(void);
 enum video_type get_bios_area_video_type(void);
 void init_terminal(void);
 void set_terminal_color(enum vga_color color);
-void terminal_raw_putchar(char c, unsigned char color, unsigned int x, unsigned int y);
+void terminal_raw_putchar(char c, uint8_t color, uint32_t x, uint32_t y);
 void move_terminal_cursor(void);
 void clear_terminal(void);
 void scroll_terminal(void);
 void terminal_putchar(char c);
-void terminal_write(const char* data, unsigned int size);
+void terminal_write(const char* data, uint32_t size);
 void terminal_writestring(const char* data);
-void terminal_write_hex(unsigned int n);
-void terminal_write_decimal(unsigned int n);
+void terminal_write_hex(uint32_t n);
+void terminal_write_decimal(uint32_t n);
+void kprintf(const char *s, ...);
 
 #endif
