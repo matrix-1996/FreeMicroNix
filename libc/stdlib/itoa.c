@@ -1,47 +1,37 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
-char* itoa(char* buf, int val, int base, int min) {
-	static char num[] = "0123456789ABCDEF";
-	char* wstr=buf;
-	int sign;
-	unsigned int uval = val;
-	
-	// Validate base
-	if (base<2 || base>16){ *wstr='\0'; return buf; }
-	
-	if (uval > 0x7FFFFFFF && base == 16) {
+char* itoa(int val,char *str, int base) 
+{
+	int i = 0;
+	bool isNegative = false;
 
-		do {
-			*wstr++ = num[(unsigned int)uval%base];
-			if (min > 0)
-				min--;
-		} while (uval/=base);
-	
-		while (min > 0) {
-			*wstr++ = '0';
-			min--;
-		}
-		*wstr='\0';
-	} else {
-		// Take care of sign
-		if ((sign=val) < 0) val = -val;
-	
-		// Conversion. Number is reversed.
-		do {
-			*wstr++ = num[(unsigned int)val%base];
-			if (min > 0)
-				min--;
-		} while (val/=base);
-	
-		while (min > 0) {
-			*wstr++ = '0';
-			min--;
-		}
-
-		if(sign < 0 && base == 10) *wstr++='-';
-		*wstr='\0';
+	if (val == 0)
+	{
+		str[i++] = '0';
+		str[i] = '\0';
+		return str;
 	}
-	// Reverse string
-	strreverse(buf,wstr-1);
-	return buf;
+
+	if (val < 0 && base == 10)
+	{
+		isNegative = true;
+		val = -val;
+	}
+
+	while (val != 0)
+	{
+		int rem = val % base;
+		str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
+		val = val/base;
+	}
+
+	if(isNegative)
+	{
+		str[i++] = '-';
+	}
+
+	str[i] = '\0';
+	strreverse(str);
+	return str;
 }

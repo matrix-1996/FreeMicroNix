@@ -2,7 +2,6 @@
 #define _X86_CPUID_H
 
 #include <stdint.h>
-#include <x86.h>
 
 typedef struct regs_t
 {

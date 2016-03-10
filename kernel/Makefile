@@ -1,8 +1,6 @@
 # This makefile is configured for an i686 Build
 # Please Reconfigure for an amd64 Build
 
-
-define x86
 HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
@@ -25,7 +23,7 @@ CPPFLAGS:=$(CPPFLAGS) -D__is_freemicronix_kernel -Iinclude
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
-ARCHDIR:=$(HOSTARCH)
+ARCHDIR:=i386
 X86DIR:=x86
 KERNELDIR:=kernel
 
@@ -44,6 +42,8 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 OBJS:=\
 $(KERNEL_ARCH_OBJS) \
+$(KERNEL_X86_OBJS) \
+$(KERNEL_OBJS) \
 loader.o \
 kernel.o \
 

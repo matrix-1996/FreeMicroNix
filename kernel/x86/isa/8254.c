@@ -2,13 +2,14 @@
 #include <stdbool.h>
 #include <x86/isa/8259.h>
 #include <x86/video/vga.h>
+#include <x86/io.h>
 
 uint32_t timer_ticks;
 uint32_t timer_frequency;
 bool timer_initialized = false;
 uint16_t timer_divisor;
 
-void Initialize_8253_PIT(uint32_t frequency, bool reset_ticks)
+void Initialize_8254_PIT(uint32_t frequency, bool reset_ticks)
 {
 	if (reset_ticks)
 		timer_ticks = 0;
@@ -28,10 +29,10 @@ void Initialize_8253_PIT(uint32_t frequency, bool reset_ticks)
 	timer_initialized = true;
 }
 
-void ISR_IRQ_8253_PIT() 
+void IRQ_8254_PIT_Handler() 
 {
 	if (!timer_initialized) {
-		outb(0x20, 0x20);
+		PIC_EOI_Master();
 		return;
 	}
 	timer_ticks++;

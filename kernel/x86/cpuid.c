@@ -1,5 +1,3 @@
-#include <x86.h>
-
 regs_t cpu_cpuid(int code)
 {
     regs_t r;

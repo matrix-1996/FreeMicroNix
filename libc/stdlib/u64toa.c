@@ -24,6 +24,6 @@ char* u64toa(char* buf, unsigned long long val, int base, int min) {
 	*wstr = '\0';
 
 	// Reverse string
-	strreverse(buf, wstr-1);
+	strreverse(buf);
 	return buf;
 }

@@ -32,15 +32,12 @@ LIBK_CPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 FREEOBJS:=\
 $(ARCH_FREEOBJS) \
 init/__init_libc.o \
-stdio/printf.o \
 stdio/putchar.o \
-stdio/puts.o \
 stdlib/abort.o \
 stdlib/abs.o \
 stdlib/atoi.o \
 stdlib/exit.o \
 stdlib/itoa.o \
-stdlib/i64toa.o \
 stdlib/strreverse.o \
 stdlib/u64toa.o \
 stdlib/uitoa.o \
@@ -54,7 +51,6 @@ string/strchr.o \
 string/strcmp.o \
 string/strcpy.o \
 string/strcspn.o \
-string/strdup.o \
 string/strlen.o \
 string/strncpy.o \
 string/strpbrk.o \

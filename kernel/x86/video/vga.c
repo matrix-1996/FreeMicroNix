@@ -1,8 +1,11 @@
-#include <video/vga.h>
-#include <io.h>
+#include <x86/video/vga.h>
+#include <x86/io.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 uint32_t terminal_row;
 uint32_t terminal_column;
@@ -224,7 +227,7 @@ void kprintf(const char *s, ...)
                     neg++;
                 } else
                     uival = ival;
-                itoa(buf, uival, 10);
+                itoa(uival, buf, 10);
 
                 buflen = strlen(buf);
                 if (buflen < size)
@@ -241,7 +244,7 @@ void kprintf(const char *s, ...)
             }
              else if (c == 'u') {
                 uival = va_arg(ap, int);
-                itoa(buf, uival, 10);
+                itoa(uival, buf, 10);
 
                 buflen = strlen(buf);
                 if (buflen < size)
@@ -254,7 +257,7 @@ void kprintf(const char *s, ...)
                 kprintf(buf);
             } else if (c == 'x' || c == 'X') {
                 uival = va_arg(ap, int);
-                itoa(buf, uival, 16);
+                itoa(uival, buf, 16);
 
                 buflen = strlen(buf);
                 if (buflen < size)
@@ -267,7 +270,7 @@ void kprintf(const char *s, ...)
                 kprintf("0x%s", buf);
             } else if (c == 'p') {
                 uival = va_arg(ap, int);
-                itoa(buf, uival, 16);
+                itoa(uival, buf, 16);
                 size = 8;
 
                 buflen = strlen(buf);
@@ -283,7 +286,7 @@ void kprintf(const char *s, ...)
                 kprintf((char *) va_arg(ap, int));
             } 
         } else
-            terminal_writestring(c);
+            putchar(c);
     }
 
     return;

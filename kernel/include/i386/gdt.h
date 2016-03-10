@@ -3,15 +3,12 @@
 
 #include <stdint.h>
 
-#define GDTSIZE	0xFF
-#define GDTBASE 0x00000800
-
 typedef struct gdtr {
     uint32_t limite;
     uint32_t base;
 } __attribute__ ((packed)) gdtr;
 
-typedef struct gdtdesc {
+typedef struct gdt_entry {
     uint16_t lim0_15;
     uint16_t base0_15;
     uint8_t base16_23;
@@ -19,7 +16,7 @@ typedef struct gdtdesc {
     uint8_t lim16_19:4;
     uint8_t other:4;
     uint8_t base24_31;
-} __attribute__ ((packed)) gdtdesc;
+} __attribute__ ((packed)) gdt_entry;
 
 typedef struct tss {
 	uint16_t previous_task, __previous_task_unused;

@@ -1,17 +1,13 @@
 #include <stdint.h>
 #include <string.h>
-#include <x86.h>
-#include <io.h>
-#include <architecture.h>
+#include <i386/gdt.h>
+#include <x86/io.h>
 
-idtdesc kidt[IDTSIZE];
-int_desc intt[IDTSIZE];
-gdtdesc kgdt[GDTSIZE];
+gdt_entry gdt[8];
 tss default_tss;
 gdtr kgdtr;
-idtr kidtr;
 
-void Initialize_GDT_Descriptor(uint32_t base, uint32_t limite, uint8_t access, uint8_t other, gdtdesc *desc)
+void Initialize_GDT_Descriptor(uint32_t base, uint32_t limite, uint8_t access, uint8_t other, gdt_entry *desc)
 {
     desc->lim0_15 = (limite & 0xffff);
     desc->base0_15 = (base & 0xffff);
@@ -32,23 +28,21 @@ void Initialize_GDT(void)
     default_tss.ss0 = 0x18;
 
     // initialize gdt segments
-    Initialize_GDT_Descriptor(0x0, 0x0, 0x0, 0x0, &kgdt[0]);
-    Initialize_GDT_Descriptor(0x0, 0xFFFFF, 0x9B, 0x0D, &kgdt[1]);  // code
-    Initialize_GDT_Descriptor(0x0, 0xFFFFF, 0x93, 0x0D, &kgdt[2]);  // data
-    Initialize_GDT_Descriptor(0x0, 0x0, 0x97, 0x0D, &kgdt[3]);      // stack
-
-    Initialize_GDT_Descriptor(0x0, 0xFFFFF, 0xFF, 0x0D, &kgdt[4]);  // ucode 
-    Initialize_GDT_Descriptor(0x0, 0xFFFFF, 0xF3, 0x0D, &kgdt[5]);  // udata 
-    Initialize_GDT_Descriptor(0x0, 0x0, 0xF7, 0x0D, &kgdt[6]);      // ustack
-
-    Initialize_GDT_Descriptor((uint32_t) & default_tss, 0x67, 0xE9, 0x00, &kgdt[7]); // tss descriptor
+    Initialize_GDT_Descriptor(0x0, 0x0, 0x0, 0x0, &gdt[0]);           // Null Segment
+    Initialize_GDT_Descriptor(0x0, 0x000FFFFF, 0x9B, 0x0D, &gdt[1]);  // Kernel Code Segment
+    Initialize_GDT_Descriptor(0x0, 0x000FFFFF, 0x93, 0x0D, &gdt[2]);  // Kernel Data Segment
+    Initialize_GDT_Descriptor(0x0, 0x000FFFFF, 0xFF, 0x0D, &gdt[3]);  // ucode 
+    Initialize_GDT_Descriptor(0x0, 0x000FFFFF, 0xF3, 0x0D, &gdt[4]);  // udata 
+    Initialize_GDT_Descriptor(0x0, 0x0, 0x97, 0x0D, &gdt[5]);         // Kernel stack
+    Initialize_GDT_Descriptor(0x0, 0x0, 0xF7, 0x0D, &gdt[6]);         // User Stack
+    Initialize_GDT_Descriptor((uint32_t) & default_tss, 0x67, 0xE9, 0x00, &gdt[7]); // tss descriptor
 
     // initialize the gdtr structure
-    kgdtr.limite = GDTSIZE * 8;
-    kgdtr.base = GDTBASE;
+    kgdtr.limite = 8 * 8;
+    kgdtr.base = 0x00000800;
 
     //copy the gdtr to its memory area
-    memcpy((char *) kgdtr.base, (char *) kgdt, kgdtr.limite);
+    memcpy((char *) kgdtr.base, (char *) gdt, kgdtr.limite);
 
     //load the gdtr register
     asm("lgdtl (kgdtr)");
