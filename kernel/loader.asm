@@ -1,5 +1,3 @@
-extern _init, kmain
-
 MBALIGN     equ  1<<0                  
 MEMINFO     equ  1<<1
 FLAGS       equ  MBALIGN | MEMINFO
@@ -22,9 +20,22 @@ section .text
 global loader
 loader:
 	mov esp, stack_top				; point esp to the start of the kernel's stack
+	push 0x0
 
-	call _init						; call global constructors
+	extern kernel_physical_start
+	push kernel_physical_start
+
+	extern kernel_physical_end
+	push kernel_physical_end
 	
+	push ebx
+	push eax
+
+	;extern _init
+	;call _init						; call global constructors
+
+
+	extern kmain
 	call kmain						; transfer control to main kernel
 
 	cli

@@ -69,7 +69,7 @@ static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
 uint16_t detect_bios_area_hardware(void);
 enum video_type get_bios_area_video_type(void);
-void init_terminal(void);
+void Initialize_Terminal(void);
 void set_terminal_color(enum vga_color color);
 void terminal_raw_putchar(char c, uint8_t color, uint32_t x, uint32_t y);
 void move_terminal_cursor(void);

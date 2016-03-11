@@ -26,14 +26,31 @@
 #define ICW4_SFNM	        0x10		/* Special fully nested (not) */
 
 
+void IRQ_Remap(void)
+{
+	outb(PIC_MASTER_COMMAND, PIC_ICW1);
+	outb(PIC_SLAVE_COMMAND, PIC_ICW1);
+	outb(PIC_MASTER_DATA, 0x20); // 0x20 = 32 which is the beginning of the IRQs
+	outb(PIC_SLAVE_DATA, 0x28);
+	outb(PIC_MASTER_DATA, 0x04);
+	outb(PIC_SLAVE_DATA, 0x02);
+	outb(PIC_MASTER_DATA, 0x01);
+	outb(PIC_SLAVE_DATA, 0x01);
+	outb(PIC_MASTER_DATA, 0x0);
+	outb(PIC_SLAVE_DATA, 0x0);
+}
+
 void Initialize_8259_PIC(uint32_t PIC_MASTER_BASE ,uint32_t PIC_SLAVE_BASE)
 {
-	uint8_t MASTER_MASK = 0;
-	uint8_t SLAVE_MASK = 0;
+	uint8_t MASTER_MASK;
+	uint8_t SLAVE_MASK;
 
-    outb(PIC_MASTER_COMMAND, ICW1_INIT + ICW1_ICW4);
+	MASTER_MASK = inb(PIC_MASTER_DATA);
+	SLAVE_MASK  = inb(PIC_SLAVE_DATA);
+
+    outb(PIC_MASTER, ICW1_INIT + ICW1_ICW4);
     io_wait();
-    outb(PIC_SLAVE_COMMAND, ICW1_INIT + ICW1_ICW4);
+    outb(PIC_SLAVE, ICW1_INIT + ICW1_ICW4);
     io_wait();
 
     outb(PIC_MASTER_DATA, PIC_MASTER_BASE);
@@ -41,9 +58,9 @@ void Initialize_8259_PIC(uint32_t PIC_MASTER_BASE ,uint32_t PIC_SLAVE_BASE)
     outb(PIC_SLAVE_DATA, PIC_SLAVE_BASE);
     io_wait();
 
-    outb(PIC_MASTER_DATA, 0x04); // Slave PIC at IRQ2
+    outb(PIC_MASTER_DATA, 0x04);
     io_wait();
-    outb(PIC_SLAVE_DATA, 0x02);  // Cascade Identity
+    outb(PIC_SLAVE_DATA, 0x02);
     io_wait();
 
     outb(PIC_MASTER_DATA, ICW4_8086);
@@ -52,6 +69,8 @@ void Initialize_8259_PIC(uint32_t PIC_MASTER_BASE ,uint32_t PIC_SLAVE_BASE)
     io_wait();
     outb(PIC_MASTER_DATA, MASTER_MASK);
     outb(PIC_SLAVE_DATA, SLAVE_MASK);
+
+    kprintf("8259 PIC Successfully Initilialized\n");
 }
 
 void Enable_8259_PIC(uint8_t irq)

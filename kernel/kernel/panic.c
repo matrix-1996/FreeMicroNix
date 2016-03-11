@@ -2,7 +2,9 @@
 
 void panic(void)
 {
-	kprintf("\nKernel Panic:\n");
-	asm volatile ("cli");
-	asm volatile ("hlt");
+	kprintf("\nKernel Panic!\n");
+	for (;;)
+	{
+		asm volatile ("hlt");		
+	}
 }

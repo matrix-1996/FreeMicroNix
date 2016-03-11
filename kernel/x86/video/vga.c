@@ -30,7 +30,7 @@ This function initializes the terminal
 It sets the position that text begins at to (0,0)
 Then it checks for the type of video and sets the color accordingly
 */
-void init_terminal(void)
+void Initialize_Terminal(void)
 {
 	terminal_row = 0;
 	terminal_column = 0;
