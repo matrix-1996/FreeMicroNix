@@ -173,6 +173,8 @@ void Interrupt_Handler_Installer(void)
     Create_IDT_Entry(30, (uint32_t) isr30, 0x08, 0x8E);
     Create_IDT_Entry(31, (uint32_t) isr31, 0x08, 0x8E);
 
+    Initialize_8259_PIC(0x20, 0x28); // Initialize the 8259 Programmable Interrupt Controller
+    
     Create_IDT_Entry(32, (uint32_t) irq0, 0x08, 0x8E);
 	Create_IDT_Entry(33, (uint32_t) irq1, 0x08, 0x8E);
 	Create_IDT_Entry(34, (uint32_t) irq2, 0x08, 0x8E);

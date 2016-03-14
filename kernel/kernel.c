@@ -31,8 +31,6 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 	set_terminal_color(COLOR_LIGHT_BLUE);
 	kprintf("FreeMicroNix Version 0.1\n");
     set_terminal_color(COLOR_LIGHT_GREY);
-
-	Initialize_8259_PIC(0x20, 0x28);      // Initialize the 8259 Programmable Interrupt Controller
 	
 	Initialize_PIT_8254();  			  // Initialize the 8254 Programmable Interval Timer
 	

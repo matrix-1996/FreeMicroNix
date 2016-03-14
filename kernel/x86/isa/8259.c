@@ -35,7 +35,7 @@ void Initialize_8259_PIC(uint32_t PIC_MASTER_BASE ,uint32_t PIC_SLAVE_BASE)
 	MASTER_MASK = inb(PIC_MASTER_DATA);
 	SLAVE_MASK  = inb(PIC_SLAVE_DATA);
 
-    outb(PIC_MASTER, ICW1_INIT + ICW1_ICW4);
+    outb(PIC_MASTER_COMMAND, ICW1_INIT + ICW1_ICW4);
     io_wait();
     outb(PIC_SLAVE, ICW1_INIT + ICW1_ICW4);
     io_wait();
