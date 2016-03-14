@@ -41,9 +41,6 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 	Interrupt_Handler_Installer();	      // Install Exception and IRQ Handlers
 
 
-	
-
-
 	char *mem_suffix;
 	uint32_t mem_divisor;
 	if(mbi->mem_upper > 100000)

@@ -31,8 +31,8 @@ loader:
 	push ebx
 	push eax
 
-	;extern _init
-	;call _init						; call global constructors
+	extern _init
+	call _init						; call global constructors
 
 
 	extern kmain

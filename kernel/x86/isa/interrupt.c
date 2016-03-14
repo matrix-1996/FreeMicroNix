@@ -9,7 +9,7 @@
 #include <x86/video/vga.h>
 #include <kernel/panic.h>
 
-const char * exception_names[] = {
+const char * exception_messages[] = {
 	"Division By Zero",
 	"Debug",
 	"Non Maskable Interrupt",
@@ -76,7 +76,7 @@ void Exception_Handler(interrupt_context_t* int_ctx)
 	if (int_ctx->int_no < 32)
 	{
 		set_terminal_color(COLOR_LIGHT_RED);
-		kprintf("Exception %d: %s (code %x)\n", int_ctx->int_no, exception_names[int_ctx->int_no],int_ctx->err_code);
+		kprintf("Exception %d: %s (code %x)\n", int_ctx->int_no, exception_messages[int_ctx->int_no],int_ctx->err_code);
 		kprintf("\nDumping Segment Registers:\n cs: %d\n ss: %d\n gs: %d\n fs: %d\n es:%d\n ds: %d\n",int_ctx->cs, int_ctx->ss, int_ctx->gs, int_ctx->fs, int_ctx->es, int_ctx->ds);
 		kprintf("\nDumping General Purpose Registers:\n edi: %d\n esi: %d\n ebp: %d\n esp: %d\n ebx: %d\n edx: %d\n ecx: %d\n eax: %d\n", int_ctx->edi, int_ctx->esi, int_ctx->ebp, int_ctx->esp, int_ctx->ebx, int_ctx->edx, int_ctx->ecx, int_ctx->eax);
 		kprintf("\nDumping Other Registers:\n eip: %d\n eflags: %d\n useresp: %d\n");
@@ -118,13 +118,6 @@ void IRQ_Handler(interrupt_context_t* int_ctx)
 	}
 	PIC_EOI_Master();
 	
-	/*
-	// Handle the potentially spurious interrupts (uint32_t)IRQ 7 and (uint32_t)IRQ 15.
-	if ( irq == IRQ7 && !(PIC_Read_ISR() & (1 << 7)) )
-		return;
-	if ( irq == IRQ15 && !(PIC_Read_ISR() & (1 << 15)) )
-		return PIC_EOI_Master();
-	*/ 
 }
 
 void Interrupt_Handler(interrupt_context_t* int_ctx)
