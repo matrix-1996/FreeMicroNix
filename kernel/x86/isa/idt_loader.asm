@@ -1,5 +1,5 @@
-extern idt
+extern idtp
 global idt_loader
 idt_loader:
-	lidt [idt]
+	lidt [idtp]
 	ret

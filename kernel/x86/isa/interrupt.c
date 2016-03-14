@@ -92,6 +92,7 @@ void IRQ_Handler(interrupt_context_t* int_ctx)
 
 	uint8_t irq = int_ctx->int_no - 32;
 
+	kprintf("IRQ: %d\n",irq);
 
 	handler = IRQ_Routines[irq];
 	

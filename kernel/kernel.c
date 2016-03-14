@@ -72,7 +72,7 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     PIT_8254_Wait(10000);
     kprintf("Wait over\n");
 	*/
-    for(;;){__asm__ __volatile__ ("nop");}
+    for(;;){__asm__ __volatile__ ("hlt");}
 
 
 }
