@@ -105,7 +105,7 @@ Interrupt_Exception_Set:
 	isr 27
 	isr 28
 	isr 29
-	isr 30
+	isr_error 30
 	isr 31
 
 

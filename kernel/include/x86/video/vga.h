@@ -75,6 +75,7 @@ void terminal_raw_putchar(char c, uint8_t color, uint32_t x, uint32_t y);
 void move_terminal_cursor(void);
 void clear_terminal(void);
 void scroll_terminal(void);
+void terminal_backspace(void);
 void terminal_putchar(char c);
 void terminal_write(const char* data, uint32_t size);
 void terminal_writestring(const char* data);

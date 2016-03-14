@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 uint32_t terminal_row;
 uint32_t terminal_column;
@@ -130,13 +129,23 @@ void scroll_terminal(void)
 	}
 }
 
+void terminal_backspace(void)
+{
+    if (terminal_column > 0)
+    {
+        terminal_column--;
+        terminal_putchar(' ');
+        terminal_column--;
+    }
+}
+
 void terminal_putchar(char c)
 {
 
     // Handle a backspace, by moving the cursor back one space
-    if (c == '\b' && terminal_column)
+    if (c == '\b')
     {
-        terminal_column--;
+        terminal_backspace();
     }
 
     // Handle a tab by increasing the cursor's X, but only to a point
@@ -179,6 +188,7 @@ void terminal_putchar(char c)
     move_terminal_cursor();
 
 }
+
 
 
 void terminal_write(const char* data, uint32_t size)
@@ -286,7 +296,7 @@ void kprintf(const char *s, ...)
                 kprintf((char *) va_arg(ap, int));
             } 
         } else
-            putchar(c);
+            terminal_putchar(c);
     }
 
     return;

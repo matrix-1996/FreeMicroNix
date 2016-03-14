@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void IRQ_Remap(void);
 void Initialize_8259_PIC(uint32_t PIC_MASTER_BASE ,uint32_t PIC_SLAVE_BASE);
 void Enable_8259_PIC(uint8_t irq);
 void Disable_8259_PIC(uint8_t irq);

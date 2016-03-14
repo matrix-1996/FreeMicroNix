@@ -33,7 +33,7 @@ tss_entry_t tss_entry;
     tss_entry.esp0 = stack;
  }
 
-void Add_GDT_Descriptor(int32_t num, uint64_t base, uint64_t limit, uint8_t access, uint8_t granularity)
+void Add_GDT_Descriptor(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity)
 {
     gdt[num].base0_15 = (base & 0xFFFF);
     gdt[num].base16_23 = (base >> 16) & 0xFF;

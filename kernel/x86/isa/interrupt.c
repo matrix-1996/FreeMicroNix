@@ -49,7 +49,8 @@ void *IRQ_Routines[16] = {
 	0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-void Install_Interrupt_Handler(uint32_t irq, void(*handler) (interrupt_context* r))
+
+void Install_Interrupt_Handler(uint32_t irq, void(*handler) (interrupt_context_t* r))
 {
 	IRQ_Routines[irq] = handler;
 }
@@ -69,15 +70,10 @@ void Page_Fault_Handler(void)
 
 }
 
-void Exception_Handler(interrupt_context* int_ctx)
+void Exception_Handler(interrupt_context_t* int_ctx)
 {
-
-	uint32_t exception = int_ctx->int_no;
-	if (exception == 14)
-	{
-		Page_Fault_Handler();
-	}
-	else
+	
+	if (int_ctx->int_no < 32)
 	{
 		set_terminal_color(COLOR_LIGHT_RED);
 		kprintf("Exception %d: %s (code %x)\n", int_ctx->int_no, exception_names[int_ctx->int_no],int_ctx->err_code);
@@ -86,23 +82,36 @@ void Exception_Handler(interrupt_context* int_ctx)
 		kprintf("\nDumping Other Registers:\n eip: %d\n eflags: %d\n useresp: %d\n");
 		panic();
 	}
+
 }
 
-void IRQ_Handler(interrupt_context* int_ctx)
+void IRQ_Handler(interrupt_context_t* int_ctx)
 {
-	uint8_t irq = int_ctx->int_no;
 
-	//kprintf("Recieved IRQ: %d\n",irq);
+	void(*handler)(interrupt_context_t* int_ctx);
 
-	void(*handler)(interrupt_context* int_ctx);
+	uint8_t irq = int_ctx->int_no - 32;
+
 
 	handler = IRQ_Routines[irq];
+	
+	if ( irq == 7 && !(PIC_Read_ISR() & (1 << 7)) )
+	{
+		return;
+	}
+
+
+	if ( irq == 15 && !(PIC_Read_ISR() & (1 << 15)) )
+	{
+		return PIC_EOI_Master();
+	}
+
 	if (handler)
 	{
 		handler(int_ctx);
 	}
 
-	if (int_ctx->int_no >= 40)
+	if (irq >= 8)
 	{
 		PIC_EOI_Slave();
 	}
@@ -117,7 +126,7 @@ void IRQ_Handler(interrupt_context* int_ctx)
 	*/ 
 }
 
-void Interrupt_Handler(interrupt_context* int_ctx)
+void Interrupt_Handler(interrupt_context_t* int_ctx)
 {
 	if ( int_ctx->int_no < 32 )
 		Exception_Handler(int_ctx);
@@ -162,8 +171,6 @@ void Interrupt_Handler_Installer(void)
     Create_IDT_Entry(29, (uint32_t) isr29, 0x08, 0x8E);
     Create_IDT_Entry(30, (uint32_t) isr30, 0x08, 0x8E);
     Create_IDT_Entry(31, (uint32_t) isr31, 0x08, 0x8E);
-    
-    IRQ_Remap();
 
     Create_IDT_Entry(32, (uint32_t) irq0, 0x08, 0x8E);
 	Create_IDT_Entry(33, (uint32_t) irq1, 0x08, 0x8E);
@@ -182,7 +189,7 @@ void Interrupt_Handler_Installer(void)
 	Create_IDT_Entry(46, (uint32_t) irq14, 0x08, 0x8E);
 	Create_IDT_Entry(47, (uint32_t) irq15, 0x08, 0x8E);
 	
-	kprintf("Interrupt Handlers Installed");
+	kprintf("Interrupt Handlers Installed\n");
 }
 
 void Enable_Interrupt(uint32_t irq)

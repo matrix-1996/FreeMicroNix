@@ -15,7 +15,7 @@ typedef struct gdt_entry {
     uint8_t access;
     uint8_t granularity;
     uint8_t base24_31;
-} __attribute__ ((packed)) gdt_entry_t;
+} gdt_entry_t;
 
 typedef struct tss_entry {
     uint32_t prev_tss;
@@ -45,7 +45,7 @@ typedef struct tss_entry {
     uint32_t ldt;
     uint16_t trap;
     uint16_t iomap_base;
-} __attribute__((packed)) tss_entry_t;
+} tss_entry_t;
 
 
 extern void gdt_loader(void);

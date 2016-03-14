@@ -1,4 +1,5 @@
 #include <x86/io.h>
+#include <x86/video/vga.h>
 #include <stdint.h>
 
 #define PIC_MASTER          0x20
@@ -25,20 +26,6 @@
 #define ICW4_BUF_MASTER	    0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	        0x10		/* Special fully nested (not) */
 
-
-void IRQ_Remap(void)
-{
-	outb(PIC_MASTER_COMMAND, PIC_ICW1);
-	outb(PIC_SLAVE_COMMAND, PIC_ICW1);
-	outb(PIC_MASTER_DATA, 0x20); // 0x20 = 32 which is the beginning of the IRQs
-	outb(PIC_SLAVE_DATA, 0x28);
-	outb(PIC_MASTER_DATA, 0x04);
-	outb(PIC_SLAVE_DATA, 0x02);
-	outb(PIC_MASTER_DATA, 0x01);
-	outb(PIC_SLAVE_DATA, 0x01);
-	outb(PIC_MASTER_DATA, 0x0);
-	outb(PIC_SLAVE_DATA, 0x0);
-}
 
 void Initialize_8259_PIC(uint32_t PIC_MASTER_BASE ,uint32_t PIC_SLAVE_BASE)
 {

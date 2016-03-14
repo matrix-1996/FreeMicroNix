@@ -9,7 +9,6 @@
 #include <x86/isa/8254.h>
 #include <x86/isa/interrupt.h>
 #include <i386/gdt.h>
-#include <i386/mm/memtype.h>
 #include <i386/mm/paging.h>
 
 
@@ -29,38 +28,51 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 
 	mbi = (multiboot_info_t*) mboot_addr;
 
+	set_terminal_color(COLOR_LIGHT_BLUE);
 	kprintf("FreeMicroNix Version 0.1\n");
-    
+    set_terminal_color(COLOR_LIGHT_GREY);
+
 	Initialize_8259_PIC(0x20, 0x28);      // Initialize the 8259 Programmable Interrupt Controller
 	
-		//Initialize_8254_PIT(100,true);  // Initialize the 8254 Programmable Interval Timer
-	Initialize_GDT();                     // Initialize the Global Descriptor Table
+	Initialize_PIT_8254();  			  // Initialize the 8254 Programmable Interval Timer
 	
-	Interrupt_Handler_Installer();	      // Install Exception and IRQ Handlers
+	Initialize_GDT();                     // Initialize the Global Descriptor Table
+
 	Install_IDT();					      // Install the Interrupt Descriptor Table
+
+	Interrupt_Handler_Installer();	      // Install Exception and IRQ Handlers
+
+
+	
 
 
 	char *mem_suffix;
 	uint32_t mem_divisor;
-	if(mbi->mem_upper > MB)
+	if(mbi->mem_upper > 100000)
 	{
 		mem_suffix = "MB";
-		mem_divisor = MB;
+		mem_divisor = 1000;
 	} 
 
 	else 
 	{
 		mem_suffix = "KB";
-		mem_divisor = KB;
+		mem_divisor = 1;
 	}
 
 	kprintf("Available Memory: %d%s\n", mbi->mem_upper /mem_divisor, mem_suffix);							
-    kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / KB, kernel_physical_end / KB);
+    kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / 1024, kernel_physical_end / 1024);
 
-    //Initialize_Paging();
+	//Initialize_Paging();
 
-	kprintf("\nKernel Booted\n");
-    for(;;){__asm__ __volatile__ ("hlt");}
+    Enable_Interrupts();
+
+    /*
+    kprintf("Waiting\n");
+    PIT_8254_Wait(10000);
+    kprintf("Wait over\n");
+	*/
+    for(;;){__asm__ __volatile__ ("nop");}
 
 
 }

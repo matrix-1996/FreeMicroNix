@@ -1,4 +1,6 @@
 #include <x86/isa/idt.h>
+#include <x86/video/vga.h>
+#include <string.h>
 #include <stdint.h>
 
 extern void idt_loader(void);
