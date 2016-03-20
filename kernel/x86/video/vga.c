@@ -11,6 +11,7 @@ uint32_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
+/*
 // Returns a pointer the bios hardware information
   uint16_t detect_bios_area_hardware(void)
 {
@@ -23,30 +24,15 @@ enum video_type get_bios_area_video_type(void)
 {
     return (enum video_type) (detect_bios_area_hardware() & 0x30);
 }
-
-/*
-This function initializes the terminal
-It sets the position that text begins at to (0,0)
-Then it checks for the type of video and sets the color accordingly
 */
+
+
 void Initialize_Terminal(void)
 {
 	terminal_row = 0;
 	terminal_column = 0;
 
-	enum video_type terminal_videtotype = get_bios_area_video_type(); // Get the type of video device
-
-	if (terminal_videtotype == VIDEO_TYPE_MONOCHROME )
-	{
-		terminal_color = make_color(COLOR_BLACK, COLOR_BLACK);
-	}
-
-	else if (terminal_videtotype == terminal_videtotype)
-	{
-			terminal_color = make_color(COLOR_LIGHT_GREY, COLOR_BLACK);
-	}
-
-	else terminal_color = COLOR_LIGHT_GREY;
+	Terminal_Set_Color(COLOR_LIGHT_GREY);
 	
 	terminal_buffer = VGA_MEMORY;
 
@@ -54,250 +40,204 @@ void Initialize_Terminal(void)
 	{
 		for ( uint32_t x = 0; x < VGA_WIDTH; x++ )
 		{
-			const uint32_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = make_vgaentry(' ', terminal_color);
+            Terminal_Putat(x, y, ' ');
 		}
 	}
 }
 
-/*
-Can be called with a vga_color enum value as a parameter
-in order to change the color of the terminal text
-*/
-void set_terminal_color(enum vga_color color)
-{
-	terminal_color = color;
-}
 
-/* Calculates the position in the vga video buffer
-to write to. Then it calls make_vgaentry */
-void terminal_raw_putchar(char c, uint8_t color, uint32_t x, uint32_t y)
+void Terminal_Scroll(void)
 {
-	const uint32_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = make_vgaentry(c, color);
-}
-
-void move_terminal_cursor(void)
-{
-	uint32_t cursorLocation = terminal_row * 80 + terminal_column;
-	outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-    outb(0x3D5, cursorLocation);      // Send the low cursor byte.
-}
-
-
-// Clears the screen, and moves the text position to (0,0)
-void clear_terminal(void)
-{
-	for ( uint32_t y = 0; y < VGA_HEIGHT; y++ )
-	{
-		for ( uint32_t x = 0; x < VGA_WIDTH; x++ )
-		{
-			terminal_raw_putchar(' ', terminal_color, x, y);
-		}
-	}
-	terminal_row = 0;
-	terminal_column = 0;
-	move_terminal_cursor();	
-}
-
-/* Moves everything on the screen up a row
-discarding the first row and clearing the
-bottom row once what was there has been moved.
-Then the current row is set to 1 less than VGA_HEIGHT,
-and the current column is set to one */
-void scroll_terminal(void)
-{
-	if  (terminal_column >= 25)
+    for (uint32_t y = 0; y < VGA_HEIGHT; y++)
     {
-        if (terminal_row >= VGA_HEIGHT)
+        for (uint32_t x = 0; x < VGA_WIDTH; x++)
         {
-            uint32_t i;
-            for (i = 0 *VGA_WIDTH; i < 24*VGA_WIDTH; i++)
-            {
-                terminal_buffer[i] = terminal_buffer[i + VGA_WIDTH];
-            }
-
-            for (i = 24 * VGA_WIDTH; i < VGA_HEIGHT * VGA_WIDTH; i++)
-            {
-                terminal_buffer[i] = ' ';
-            }
-
-            terminal_row = 24;
+            terminal_buffer[y * VGA_WIDTH + x] = terminal_buffer[(y + 1) * VGA_WIDTH + x];
         }
-	}
-}
-
-void terminal_backspace(void)
-{
-    if (terminal_column > 0)
-    {
-        terminal_column--;
-        terminal_putchar(' ');
-        terminal_column--;
     }
 }
 
-void terminal_putchar(char c)
+void Terminal_Putat(uint32_t x, uint32_t y, char c)
 {
+    const uint32_t index = y * VGA_WIDTH + x;
+    uint16_t color16 = terminal_color;
+    terminal_buffer[index] = c | color16 << 8;
+}
 
-    // Handle a backspace, by moving the cursor back one space
-    if (c == '\b')
+
+void Terminal_Putch(char c)
+{
+    if (c == '\n' || terminal_column == VGA_WIDTH)
     {
-        terminal_backspace();
+        terminal_column = 0;
+        terminal_row++;
+        return;
     }
-
-    // Handle a tab by increasing the cursor's X, but only to a point
-    // where it is divisible by 8.
     else if (c == '\t')
     {
         terminal_column = (terminal_column+8) & ~(8-1);
     }
-
-    // Handle carriage return
+    else if (c == '\b')
+    {
+        Terminal_Backspace();
+    }
     else if (c == '\r')
     {
-        terminal_column = 0;
+        terminal_row = 0;
     }
 
-    // Handle newline by moving cursor back to left and increasing the row
-    else if (c == '\n')
+    if (terminal_row >= VGA_HEIGHT)
     {
-        terminal_column = 0;
-        terminal_row++;
+        Terminal_Scroll();
     }
-    // Handle any other kprintfable character.
-    else if(c >= ' ')
+
+    Terminal_Putat(terminal_column, terminal_row, c);
+    terminal_column++;
+}
+
+void Terminal_Print(char* s)
+{
+    uint32_t len = strlen(s);
+    for (uint32_t i = 0; i < len; i++)
     {
-    	terminal_raw_putchar(c, terminal_color, terminal_column, terminal_row);
-    	terminal_column++;
+        Terminal_Putch(s[i]);
     }
+    Terminal_Update_Cursor();
+}
 
-    // Check if we need to insert a new line because we have reached the end
-    // of the screen.
-    if (terminal_column >= VGA_WIDTH)
+void Terminal_Print_Int(int32_t i)
+{
+    char *s = (char*)"\0";
+    itoa(i, s, 16);
+    Terminal_Print(s);
+}
+
+void Terminal_Println(char *s)
+{
+    Terminal_Print(s);
+    Terminal_Putch('\n');
+}
+
+void Terminal_Set_Color(enum vga_color color)
+{
+    terminal_color = color | COLOR_BLACK << 4;
+}
+
+void Terminal_Backspace(void)
+{
+    if (terminal_column > 0)
     {
-        terminal_column = 0;
-        terminal_row ++;
+        terminal_column--;
+        Terminal_Putch(' ');
+        terminal_column--;
     }
+}
 
-    // Scroll the screen if needed.
-    scroll_terminal();
-    // Move the hardware cursor.
-    move_terminal_cursor();
+void Terminal_Newline(void)
+{
+    Terminal_Putch('\n');
+}
 
+
+// Clears the screen, and moves the text position to (0,0)
+void Terminal_Clear(void)
+{
+    terminal_row = 0;
+    terminal_column = 0;
+
+	for ( uint32_t y = 0; y < VGA_HEIGHT; y++ )
+	{
+		for ( uint32_t x = 0; x < VGA_WIDTH; x++ )
+		{
+			Terminal_Putch(' ');
+		}
+	}
+	terminal_row = 0;
+	terminal_column = 0;
 }
 
 
 
-void terminal_write(const char* data, uint32_t size)
+void kprintf(const char *format, ...)
 {
-	for ( uint32_t i = 0; i < size; i++ )
-		terminal_putchar(data[i]);
-}
+    char** arg = (char**) &format;
+    char c;
+    char buf[20];
 
+    arg++;
 
-void terminal_writestring(const char* data)
-{
-	terminal_write(data, strlen(data));
-}
+    while((c = *format++) != 0)
+    {
+        if(c != '%')
+        {
+            Terminal_Putch(c);
+        }
+        else {
+            char* p;
+            c = *format++;
+            switch(c)
+            {
+                case 'd':
+                {
+                    itoa((int) arg++, buf, 10);
+                    p = buf;
+                    goto string;
+                    break;
+                }
+                case 'u':
+                {
+                    itoa((int) arg++, buf, 10);
+                    p = buf;
+                    goto string;
+                    break;
+                }
+                case 'x':
+                {
+                    itoa(*((int*) arg++), buf, 16);
+                    p = buf;
 
+                    goto string;
+                    break;                    
+                }
 
-void kprintf(const char *s, ...)
-{
-    va_list ap;
+                case 's':
+                {
+                    p = *arg++;
+                    if(!p) 
+                    {
+                        p = (char*)"(null)";
 
-    char buf[16];
-    int i, j, size, buflen, neg;
+                    }
 
-    uint8_t c;
-    int ival;
-    uint32_t uival;
+                    string:
+                        Terminal_Print(p);
+                        break;                      
+                }
 
-    va_start(ap, s);
+                case 0:
+                {
+                    return; 
+                    break;                   
+                }
 
-    while ((c = *s++)) {
-        size = 0;
-        neg = 0;
+                default:
+                {
+                    Terminal_Putch((char)*((int*) arg++));
+                    break;                    
+                }
 
-        if (c == 0)
-            break;
-        else if (c == '%') {
-            c = *s++;
-            if (c >= '0' && c <= '9') {
-                size = c - '0';
-                c = *s++;
             }
-
-            if (c == 'd') {
-                ival = va_arg(ap, int);
-                if (ival < 0) {
-                    uival = 0 - ival;
-                    neg++;
-                } else
-                    uival = ival;
-                itoa(uival, buf, 10);
-
-                buflen = strlen(buf);
-                if (buflen < size)
-                    for (i = size, j = buflen; i >= 0;
-                         i--, j--)
-                        buf[i] =
-                            (j >=
-                             0) ? buf[j] : '0';
-
-                if (neg)
-                    kprintf("-%s", buf);
-                else
-                    kprintf(buf);
-            }
-             else if (c == 'u') {
-                uival = va_arg(ap, int);
-                itoa(uival, buf, 10);
-
-                buflen = strlen(buf);
-                if (buflen < size)
-                    for (i = size, j = buflen; i >= 0;
-                         i--, j--)
-                        buf[i] =
-                            (j >=
-                             0) ? buf[j] : '0';
-
-                kprintf(buf);
-            } else if (c == 'x' || c == 'X') {
-                uival = va_arg(ap, int);
-                itoa(uival, buf, 16);
-
-                buflen = strlen(buf);
-                if (buflen < size)
-                    for (i = size, j = buflen; i >= 0;
-                         i--, j--)
-                        buf[i] =
-                            (j >=
-                             0) ? buf[j] : '0';
-
-                kprintf("0x%s", buf);
-            } else if (c == 'p') {
-                uival = va_arg(ap, int);
-                itoa(uival, buf, 16);
-                size = 8;
-
-                buflen = strlen(buf);
-                if (buflen < size)
-                    for (i = size, j = buflen; i >= 0;
-                         i--, j--)
-                        buf[i] =
-                            (j >=
-                             0) ? buf[j] : '0';
-
-                kprintf("0x%s", buf);
-            } else if (c == 's') {
-                kprintf((char *) va_arg(ap, int));
-            } 
-        } else
-            terminal_putchar(c);
+        }
     }
-
-    return;
+    Terminal_Update_Cursor();
 }
+
+void Terminal_Update_Cursor(void)
+{
+    uint32_t cursorLocation = (terminal_row * 80) + terminal_column;
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t) (cursorLocation & 0xFF));
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t) ((cursorLocation >> 8) & 0xFF ));
+}
+

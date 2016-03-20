@@ -75,11 +75,11 @@ void Exception_Handler(interrupt_context_t* int_ctx)
 	
 	if (int_ctx->int_no < 32)
 	{
-		set_terminal_color(COLOR_LIGHT_RED);
+		Terminal_Set_Color(COLOR_LIGHT_RED);
 		kprintf("Exception %d: %s (code %x)\n", int_ctx->int_no, exception_messages[int_ctx->int_no],int_ctx->err_code);
-		kprintf("\nDumping Segment Registers:\n cs: %d\n ss: %d\n gs: %d\n fs: %d\n es:%d\n ds: %d\n",int_ctx->cs, int_ctx->ss, int_ctx->gs, int_ctx->fs, int_ctx->es, int_ctx->ds);
-		kprintf("\nDumping General Purpose Registers:\n edi: %d\n esi: %d\n ebp: %d\n esp: %d\n ebx: %d\n edx: %d\n ecx: %d\n eax: %d\n", int_ctx->edi, int_ctx->esi, int_ctx->ebp, int_ctx->esp, int_ctx->ebx, int_ctx->edx, int_ctx->ecx, int_ctx->eax);
-		kprintf("\nDumping Other Registers:\n eip: %d\n eflags: %d\n useresp: %d\n");
+		kprintf("\nDumping Segment Registers:\n cs: %x ss: %x gs: %x fs: %x es:%x ds: %x",int_ctx->cs, int_ctx->ss, int_ctx->gs, int_ctx->fs, int_ctx->es, int_ctx->ds);
+		kprintf("\nDumping General Purpose Registers:\n edi: %x esi: %x ebp: %x esp: %x ebx: %x edx: %x ecx: %x eax: %x", int_ctx->edi, int_ctx->esi, int_ctx->ebp, int_ctx->esp, int_ctx->ebx, int_ctx->edx, int_ctx->ecx, int_ctx->eax);
+		kprintf("\nDumping Other Registers:\n eip: %x eflags: %x useresp: %x");
 		panic();
 	}
 

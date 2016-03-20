@@ -20,17 +20,17 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 	// if Kernel Loaded Improperly
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC)
 	{
-		set_terminal_color(COLOR_LIGHT_RED);
+		Terminal_Set_Color(COLOR_LIGHT_RED);
 		kprintf("INVALID_MULTIBOOT NUMBER!\n");
-		set_terminal_color(COLOR_LIGHT_GREY);
+		Terminal_Set_Color(COLOR_LIGHT_GREY);
 		return; 
 	}
 
 	mbi = (multiboot_info_t*) mboot_addr;
 
-	set_terminal_color(COLOR_LIGHT_BLUE);
+	Terminal_Set_Color(COLOR_LIGHT_BLUE);
 	kprintf("FreeMicroNix Version 0.1\n");
-    set_terminal_color(COLOR_LIGHT_GREY);
+    Terminal_Set_Color(COLOR_LIGHT_GREY);
 	
 	Initialize_PIT_8254();  			  // Initialize the 8254 Programmable Interval Timer
 	

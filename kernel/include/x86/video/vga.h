@@ -43,21 +43,6 @@ static inline uint8_t make_color(enum vga_color fg, enum vga_color bg)
 	return fg | bg << 4;
 }
 
-/* Takes in the ascii value of the 
-entered character, and the color that
-the character should appear as on the 
-screen. It does a logical OR on the 2
-values. The result of the operation is
-bitwise shifted over 8 place values.
-The resulting value is the raw binary
-representation of the color and ascii 
-value */
-static inline uint16_t make_vgaentry(char c, uint8_t color)
-{
-	uint16_t c16 = c;
-	uint16_t color16 = color;
-	return c16 | color16 << 8;
-}
 
 static const uint32_t VGA_WIDTH = 80; // The standard height of a vga terminal
 static const uint32_t VGA_HEIGHT = 25; // The standard width of a vga terminal
@@ -67,20 +52,18 @@ static const uint32_t VGA_HEIGHT = 25; // The standard width of a vga terminal
 memory is set to 0xB8000 */
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
-uint16_t detect_bios_area_hardware(void);
-enum video_type get_bios_area_video_type(void);
+void Terminal_Set_Color(enum vga_color color);
 void Initialize_Terminal(void);
-void set_terminal_color(enum vga_color color);
-void terminal_raw_putchar(char c, uint8_t color, uint32_t x, uint32_t y);
-void move_terminal_cursor(void);
-void clear_terminal(void);
-void scroll_terminal(void);
-void terminal_backspace(void);
-void terminal_putchar(char c);
-void terminal_write(const char* data, uint32_t size);
-void terminal_writestring(const char* data);
-void terminal_write_hex(uint32_t n);
-void terminal_write_decimal(uint32_t n);
-void kprintf(const char *s, ...);
+void Terminal_Scroll(void);
+void Terminal_Putat(uint32_t, uint32_t y, char c);
+void Terminal_Putch(char c);
+void Terminal_Print(char *s);
+void Terminal_Print_Int(int32_t i);
+void Terminal_Println(char* s);
+void Terminal_Backspace(void);
+void Terminal_Newline(void);
+void Terminal(void);
+void kprintf(const char *format, ...);
+void Terminal_Update_Cursor(void);
 
 #endif
