@@ -18,6 +18,9 @@
 #define IRQ14 46
 #define IRQ15 47
 
+#define NUM_INTERRUPTS 256
+
+
 /*
 PC Interrupts:
 IRQ	Interrupt
@@ -41,11 +44,10 @@ IRQ	Interrupt
 
 typedef struct interrupt_context
 {
+	uint32_t signal_pending
+	uint32_t kerrno;
 	uint32_t cr2;
-	uint32_t gs;
-	uint32_t fs;
 	uint32_t ds;
-	uint32_t es;
 	uint32_t edi;
 	uint32_t esi;
 	uint32_t ebp;
@@ -62,7 +64,16 @@ typedef struct interrupt_context
 
 } interrupt_context_t;
 
-void Install_Interrupt_Handler(uint32_t irq, void(*handler) (interrupt_context_t* r));
+typedef struct interrupt_handler
+{
+	void (*handler)(interrupt_context_t*, void*);
+	void* context;
+	interrupt_handler* next;
+	interrupt_handler* prev;
+
+} interrupt_handler_t;
+
+void Install_Interrupt_Handler(uint32_t index, interrupt_handler_t* handler);
 void Uninstall_Interrupt_Handler(uint32_t irq);
 void Interrupt_Handler_Installer(void);
 void Enable_Interrupt(uint32_t irq);

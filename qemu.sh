@@ -2,4 +2,4 @@
 set -e
 . ./iso.sh
 
-qemu-system-i386 -cdrom freemicronix.iso
+qemu-system-i386 -d int -cdrom freemicronix.iso

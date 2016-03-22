@@ -9,7 +9,7 @@ typedef struct idt_entry {
     uint8_t always0;
     uint8_t flags;
     uint16_t base_hi;
-} __attribute__((packed)) idt_entry_t;
+}  idt_entry_t;
 
 
 typedef struct idt_ptr {

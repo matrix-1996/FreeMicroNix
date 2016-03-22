@@ -14,18 +14,33 @@ tss_entry_t tss_entry;
 
  void tss_setup(void)
  {
-    uint32_t base = (uint32_t)&tss_entry;
-    uint32_t limit = sizeof(tss_entry);
-    memset(&tss_entry, 0, sizeof(tss_entry));
-
+    tss_entry.prev_tss = 0;
+    tss_entry.esp0 = 0;    
     tss_entry.ss0 = 0x10;
-    tss_entry.esp0 = 0;
-    tss_entry.es = 0x10;
-    tss_entry.cs = 0x08;
+    tss_entry.esp1 = 0;
+    tss_entry.ss1 = 0;
+    tss_entry.esp2 = 0;
+    tss_entry.ss2 = 0;
+    tss_entry.cr3 = 0;
+    tss_entry.eip = 0;
+    tss_entry.eflags = 0;
+    tss_entry.eax = 0;
+    tss_entry.ecx = 0;
+    tss_entry.edx = 0;
+    tss_entry.ebx = 3;
+    tss_entry.esp = 0;
+    tss_entry.ebp = 0;
+    tss_entry.esi = 0;
+    tss_entry.edi = 0;
+    tss_entry.es = 0x13;
+    tss_entry.cs = 0x0B;
+    tss_entry.ss = 0;
     tss_entry.ds = 0x13;
     tss_entry.fs = 0x13;
     tss_entry.gs = 0x13;
-
+    tss_entry.ldt = 0;
+    tss_entry.trap = 0;
+    tss_entry.iomap_base = 0;
  }
 
  void tss_set_kernel_stack(uint32_t stack)
@@ -58,9 +73,9 @@ void Initialize_GDT(void)
     Add_GDT_Descriptor(2, 0x0, 0xFFFFFFFF, 0x92, 0xCF);                  // Kernel Data Segment
     Add_GDT_Descriptor(3, 0x0, 0xFFFFFFFF, 0xFA, 0xCF);                  // User Code Segment 
     Add_GDT_Descriptor(4, 0x0, 0xFFFFFFFF, 0xF2, 0xCF);                  // User Data Segment
-    Add_GDT_Descriptor(5, 0x0, sizeof(tss_entry) - 1, 0xE9, 0x0);              // Task Switch Segment 
-    //Add_GDT_Descriptor(0x06, 0x0, 0xFFFFFFFF, 0x97, 0xCF);               // Kernel Stack Segment
-    //Add_GDT_Descriptor(0x07, 0x0, 0xFFFFFFFF, 0xF7, 0xCF);               // User Stack Segment
+    Add_GDT_Descriptor(5, 0x0, sizeof(tss_entry) - 1, 0xE9, 0x0);        // Task Switch Segment
+    //Add_GDT_Descriptor(6, 0x0, 0xFFFFFFFF, 0xF2, 0xCF);                  // F Segment
+    //Add_GDT_Descriptor(7, 0x0, 0xFFFFFFFF, 0xF2, 0xCF);                  // G Segment
 
     tss_setup();
 

@@ -22,6 +22,7 @@ void Install_IDT(void)
 	idtp.limit = (sizeof(idt_entry_t) * 256) -1;
 	idtp.base  = (uint32_t) &idt;
 	memset(&idt, 0, sizeof(idt_entry_t) * 256);
+	
 	idt_loader();
 	kprintf("Interrupt Descriptor Table Initialized\n");
 }
