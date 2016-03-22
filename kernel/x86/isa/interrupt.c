@@ -44,42 +44,20 @@ const char * exception_messages[] = {
 	"Reserved",
 };
 
-static interrupt_handler_t* interrupt_handlers[NUM_INTERRUPTS];
+void *IRQ_Routines[16] = {
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+};
 
-
-void Install_Interrupt_Handler(uint32_t index, interrupt_handler_t* handler)
+void Install_Interrupt_Handler(uint32_t index, void(*handler) (interrupt_context_t* r))
 {
-	if (index < NUM_INTERRUPTS)
-	{
-		handler->prev = NULL;
-		
-		if (( handler->next = interrupt_handlers[index]))
-		{
-			handler->next->prev = handler;
-		}
-
-		interrupt_handler[index] = handler;
-	}
+	IRQ_Routines[index] = handler;
 
 }
 
-void Uninstall_Interrupt_Handler(uint32_t index, interrupt_handler_t* handler)
+void Uninstall_Interrupt_Handler(uint32_t index)
 {
-	if (index < NUM_INTERRUPTS)
-	{
-		if (handler->prev)
-		{
-			handler->prev->next = handler->next;
-		}
-		else
-		{
-			interrupt_handlers[index] = handler->next;
-		}
-		if (handler->next)
-		{
-			handler->next->prev = handler->prev;
-		}
-	}
+	IRQ_Routines[index] = 0;
 }
 
 void Page_Fault_Handler(void)
@@ -99,8 +77,8 @@ void Exception_Handler(interrupt_context_t* int_ctx)
 	{
 		Terminal_Set_Color(COLOR_LIGHT_RED);
 		kprintf("Exception %x: %s (code %x)\n", int_ctx->int_no, exception_messages[int_ctx->int_no],int_ctx->err_code);
-		kprintf("\nDumping Segment Registers:\n cs: %x ss: %x gs: %x fs: %x es:%x ds: %x",int_ctx->cs, int_ctx->ss, int_ctx->gs, int_ctx->fs, int_ctx->es, int_ctx->ds);
-		kprintf("\nDumping General Purpose Registers:\n edi: %x esi: %x ebp: %x esp: %x ebx: %x edx: %x ecx: %x eax: %x", int_ctx->edi, int_ctx->esi, int_ctx->ebp, int_ctx->esp, int_ctx->ebx, int_ctx->edx, int_ctx->ecx, int_ctx->eax);
+		kprintf("\nDumping Segment Registers:\n cs: %x ss: %x ds: %x",int_ctx->cs, int_ctx->ss, int_ctx->ds);
+		kprintf("\nDumping General Purpose Registers:\n edi: %x esi: %x ebp: %x ebx: %x edx: %x ecx: %x eax: %x", int_ctx->edi, int_ctx->esi, int_ctx->ebp, int_ctx->ebx, int_ctx->edx, int_ctx->ecx, int_ctx->eax);
 		kprintf("\nDumping Other Registers:\n eip: %x eflags: %x useresp: %x");
 		panic();
 	}
@@ -114,7 +92,7 @@ void IRQ_Handler(interrupt_context_t* int_ctx)
 
 	uint8_t irq = int_ctx->int_no - 32;
 
-	kprintf("IRQ: %d\n",irq);
+	kprintf("IRQ: %x\n",irq);
 
 	handler = IRQ_Routines[irq];
 	
@@ -139,8 +117,6 @@ void IRQ_Handler(interrupt_context_t* int_ctx)
 		PIC_EOI_Slave();
 	}
 	PIC_EOI_Master();
-	
-	kprintf("IRQ: %d\n",int_ctx->int_no);
 }
 
 void Interrupt_Handler(interrupt_context_t* int_ctx)
@@ -155,6 +131,8 @@ void Interrupt_Handler(interrupt_context_t* int_ctx)
 
 void Interrupt_Handler_Installer(void)
 {
+
+    Initialize_8259_PIC(0x20, 0x28); // Initialize the 8259 Programmable Interrupt Controller
 
 	Create_IDT_Entry(0, (uint32_t) isr0, 0x08, 0x8E);
     Create_IDT_Entry(1, (uint32_t) isr1, 0x08, 0x8E);
@@ -187,10 +165,7 @@ void Interrupt_Handler_Installer(void)
     Create_IDT_Entry(28, (uint32_t) isr28, 0x08, 0x8E);
     Create_IDT_Entry(29, (uint32_t) isr29, 0x08, 0x8E);
     Create_IDT_Entry(30, (uint32_t) isr30, 0x08, 0x8E);
-    Create_IDT_Entry(31, (uint32_t) isr31, 0x08, 0x8E);
-
-    Initialize_8259_PIC(0x20, 0x28); // Initialize the 8259 Programmable Interrupt Controller
-    
+    Create_IDT_Entry(31, (uint32_t) isr31, 0x08, 0x8E);    
     Create_IDT_Entry(32, (uint32_t) irq0, 0x08, 0x8E);
 	Create_IDT_Entry(33, (uint32_t) irq1, 0x08, 0x8E);
 	Create_IDT_Entry(34, (uint32_t) irq2, 0x08, 0x8E);

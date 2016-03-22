@@ -60,8 +60,7 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / 1024, kernel_physical_end / 1024);
 
 	//Initialize_Paging();
-    //do_irq_1();
-    //Enable_Interrupts();
+    Enable_Interrupts();
 
     /*
     kprintf("Waiting\n");

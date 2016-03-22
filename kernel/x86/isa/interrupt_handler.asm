@@ -46,6 +46,8 @@ global irq12
 global irq13
 global irq14
 global irq15
+global null_interrupt
+
 
 %macro isr 1
 	global isr%1
@@ -108,10 +110,6 @@ Interrupt_Exception_Set:
 	isr_error 30
 	isr 31
 
-
-
-
-
 Interrupt_IRQ_Set:
 	irq 0
 	irq 1
@@ -134,13 +132,7 @@ Interrupt_IRQ_Set:
 extern Interrupt_Handler
 IDT_ISR_Stub:
 	
-	push eax
-	push ebx
-	push ecx
-	push edx
-	push ebp
-	push esi
-	push edi	
+	pushad
 	push ds
 	push es
 	push fs
@@ -159,12 +151,9 @@ IDT_ISR_Stub:
 	pop fs
 	pop es
 	pop ds
-	pop edi
-	pop esi
-	pop ebp
-	pop edx
-	pop ecx 
-	pop ebx
-	pop eax
+	popad
 	add esp, 8
 	iret
+
+null_interrupt:
+iret

@@ -44,37 +44,17 @@ IRQ	Interrupt
 
 typedef struct interrupt_context
 {
-	uint32_t signal_pending
-	uint32_t kerrno;
-	uint32_t cr2;
-	uint32_t ds;
-	uint32_t edi;
-	uint32_t esi;
-	uint32_t ebp;
-	uint32_t ebx;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t eax;
-	uint32_t int_no;
-	uint32_t err_code;
-	uint32_t cs;
-	uint32_t eflags;
-	uint32_t esp; /* If (cs & 0x3) != 0 */
-	uint32_t ss;  /* If (cs & 0x3) != 0 */
+
+	uint32_t gs, fs, es, ds;
+	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+	uint32_t int_no, err_code;
+	uint32_t eip, cs, eflags, useresp, ss;
 
 } interrupt_context_t;
 
-typedef struct interrupt_handler
-{
-	void (*handler)(interrupt_context_t*, void*);
-	void* context;
-	interrupt_handler* next;
-	interrupt_handler* prev;
 
-} interrupt_handler_t;
-
-void Install_Interrupt_Handler(uint32_t index, interrupt_handler_t* handler);
-void Uninstall_Interrupt_Handler(uint32_t irq);
+void Install_Interrupt_Handler(uint32_t index, void(*handler) (interrupt_context_t* r));
+void Uninstall_Interrupt_Handler(uint32_t index);
 void Interrupt_Handler_Installer(void);
 void Enable_Interrupt(uint32_t irq);
 void Disable_Interrupt(uint32_t irq);
