@@ -4,6 +4,7 @@
 #include <x86/io.h>
 #include <x86/multiboot.h>
 #include <x86/video/vga.h>
+#include <x86/sound/speaker.h>
 #include <x86/isa/idt.h>
 #include <x86/isa/8259.h>
 #include <x86/isa/8254.h>
@@ -61,6 +62,8 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 
 	//Initialize_Paging();
     Enable_Interrupts();
+
+    Speaker_Beep();
 
     /*
     kprintf("Waiting\n");
