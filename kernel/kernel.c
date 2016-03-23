@@ -63,13 +63,14 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 	//Initialize_Paging();
     Enable_Interrupts();
 
+    kprintf("Waiting 5 seconds\n");
+    PIT_8254_Wait(5000);
+    kprintf("Waited 5 seconds\n");
+    
+    kprintf("Testing Internal PC Speaker\nYou will hear a beep if present\n");
     Speaker_Beep();
 
-    /*
-    kprintf("Waiting\n");
-    PIT_8254_Wait(10000);
-    kprintf("Wait over\n");
-	*/
+    kprintf("System Loaded\n");
     for(;;){__asm__ __volatile__ ("hlt");}
 
 

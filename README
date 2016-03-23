@@ -4,15 +4,25 @@
 |  _|| | |  __/  __/ |  | | | (__| | | (_) | |\  | |>  < 
 |_|  |_|  \___|\___|_|  |_|_|\___|_|  \___/|_| \_|_/_/\_\
                                                          
-Version 0.01 Reborn
+Version 0.11
 
-     Licensing Information
-Read the attached LICENSE file for licensing information.
+Working Features:
+	VGA Terminal Driver
+	Global Descriptor Table
+	Interrupt Descriptor Table
+	8259 Programmable Interrupt Controller
+	Interrupt Handlers
+	PC Spekeaker Driver
+	8254 Programmable Interval Timer Driver
 
-     Project Creator Information
-My name Will Jones and I can be
-contacted by phone at +1(818)395-9816 
-or by email at willgreat5@hotmail.com
+Features In Progress:
+	Memory Management System
+	Memory Paging
+	PS/2 Keyboard Driver
+	Bootloader
 
-     Credits
-Special Thanks to osdev.org
+Licensing Information
+	Read the attached LICENSE file for licensing information.
+
+Credits
+	Special Thanks to osdev.org

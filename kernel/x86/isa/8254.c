@@ -40,7 +40,7 @@ void PIT_8254_Wait(uint64_t ticks)
 void Initialize_PIT_8254()
 {
 	PIT_8254_Phase(1000);
-	Install_Interrupt_Handler(IRQ0, PIT_8254_Handler);
+	Install_Interrupt_Handler(0, PIT_8254_Handler);
 	kprintf("8254 PIT Initialized on channel 0\n");
 }
 
