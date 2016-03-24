@@ -46,7 +46,6 @@ global irq12
 global irq13
 global irq14
 global irq15
-global null_interrupt
 
 
 %macro isr 1
@@ -154,6 +153,3 @@ IDT_ISR_Stub:
 	popad
 	add esp, 8
 	iret
-
-null_interrupt:
-iret

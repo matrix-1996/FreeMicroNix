@@ -9,9 +9,7 @@
 #include <x86/isa/8259.h>
 #include <x86/isa/8254.h>
 #include <x86/isa/interrupt.h>
-#include <x86/isa/do_irq.h>
-#include <i386/gdt.h>
-#include <i386/mm/paging.h>
+#include <x86/gdt.h>
 
 
 void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, uint32_t kernel_physical_start)
@@ -57,10 +55,15 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 		mem_divisor = 1;
 	}
 
+	kprintf("\n")
 	kprintf("Available Memory: %d%s\n", mbi->mem_upper /mem_divisor, mem_suffix);							
     kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / 1024, kernel_physical_end / 1024);
 
-	//Initialize_Paging();
+
+
+    Initialize_Memory(mbi->mem_upper, kernel_physical_end);	// Initiliazes memory management
+
+
     Enable_Interrupts();
 
     kprintf("Waiting 5 seconds\n");

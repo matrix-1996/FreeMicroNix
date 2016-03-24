@@ -13,14 +13,14 @@ void keyboard_reboot(void)
 {
 	uint8_t temp;
 	
-	disable_interrupts();
+	Disable_Interrupts();
 
 	do
 	{
 		temp = inb(KEYBOARD_INTERFACE);	// empty user data
 		if (check_flag(temp, 0) != 0)
 		{
-			inb(0x60)					//  empty keyboard data
+			inb(0x60);					//  empty keyboard data
 		}
 	} while (check_flag(temp, 1) != 0);
 
@@ -35,7 +35,7 @@ void keyboard_reboot(void)
 
 void reboot(void)
 {
-	kprintf("Ctrl+Alt+Del Pressed, restarting CPU\n");	// Warn the user
+	kprintf("Rebooting CPU\n");	// Warn the user
 	PIT_8254_Wait(5000); 								// Wait approximately 5 seconds
 	keyboard_reboot();	 								// Do keyboard_reboot()
 }

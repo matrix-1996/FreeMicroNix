@@ -6,8 +6,8 @@ struct list_node;
 
 typedef struct list
 {
-	list_node *head;
-	list_node *tail;
+	struct list_node *head;
+	struct list_node *tail;
 } list_t;
 
 typedef struct list_node

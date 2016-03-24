@@ -1,5 +1,5 @@
-#ifndef _I386_GDT_H
-#define _I386_GDT_H
+#ifndef _I686_GDT_H
+#define _I686_GDT_H
 
 
 struct gdt_ptr {

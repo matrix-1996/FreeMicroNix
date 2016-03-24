@@ -1,10 +1,10 @@
 #include <x86/isa/interrupt.h>
-#include <x86/isa/8042.h>
 #include <x86/keyboard/ps2_keyboard.h>
 #include <x86/io.h>
 #include <x86/ascii.h>
 #include <x86/video/vga.h>
 #include <kernel/reboot.h>
+#include <datastruct/list.h>
 
 #define KEY_INVALID 127
 
@@ -17,8 +17,6 @@
 #define KEYBOARD_PORT_B 0x61
 #define KEYBOARD_ACK 0x80
 
-
-
 #define BUFFER_SIZE 256
 
 typedef struct keymap
@@ -29,30 +27,26 @@ typedef struct keymap
 	char special;
 } keymap_t;
 
-static keymap_t keymap[]
+static keymap_t keymap[] = 
 {
 	#include <keymap.us.c>
-}
+};
 
 static char buffer[BUFFER_SIZE];
 static int buffer_read = 0;
 static int buffer_write = 0;
 
-static struct list queue = LIST_INIT;
+static list_t queue = {0,0};
 
 static int keyboard_scan()
 {
+
 	int code, ack;
 	code = inb(KEYBOARD_PORT_A);
-	iowait();
 	ack = inb(KEYBOARD_PORT_B);
-	iowait();
 	ack |= KEYBOARD_ACK;
-	oub(KEYBOARD_PORT_B, ack);
-	iowait();
+	outb(KEYBOARD_PORT_B, ack);
 	outb(KEYBOARD_PORT_B,ack);
-	iowait();
-
 	return code;
 }
 
@@ -98,6 +92,7 @@ static char keyboard_map( int code )
 	{
 		if (ctrl_mode && alt_mode && keymap[code].normal == ASCII_DEL)
 		{
+			kprintf("CTRL+ALT+DEL Pressed\n");
 			reboot();
 			return KEY_INVALID;
 		}
@@ -136,7 +131,7 @@ static char keyboard_map( int code )
 }
 
 
-void keyboard_handler(void)
+void keyboard_handler(interrupt_context_t *int_ctx)
 {
 	char c;
 	c = keyboard_map(keyboard_scan());

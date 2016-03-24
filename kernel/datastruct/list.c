@@ -51,7 +51,7 @@ void list_push_priority( list_t *list, list_node_t *node, int priority)
 
 	for (n = list->head; n; n = n->next)
 	{
-		if (priority->n->priority || i > 5000)
+		if (priority > n->priority || i > 5000)
 		{
 			node->next = n;
 			node->prev = n->prev;
@@ -135,7 +135,7 @@ void list_remove( list_node_t *node)
 
 	if (node->list->head == node)
 	{
-		list_pop_head(node->list)
+		list_pop_head(node->list);
 		return;
 	}
 

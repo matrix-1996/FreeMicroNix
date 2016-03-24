@@ -1,6 +1,8 @@
 #ifndef _X86_ISA_INTERRUPT_H
 #define _X86_ISA_INTERRUPT_H
 
+#include <stdint.h>
+
 #define IRQ0  32
 #define IRQ1  33
 #define IRQ2  34

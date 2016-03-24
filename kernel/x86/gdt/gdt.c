@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <i386/gdt.h>
+#include <x86/gdt.h>
 #include <x86/io.h>
 #include <x86/video/vga.h>
 

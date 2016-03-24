@@ -23,10 +23,12 @@ CPPFLAGS:=$(CPPFLAGS) -D__is_freemicronix_kernel -Iinclude
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
-ARCHDIR:=i386
+ARCHDIR:=i686
 X86DIR:=x86
 KERNELDIR:=kernel
 DATASTRUCTDIR:=datastruct
+MMDIR:=mm
+PROCDIR:=proc
 
 # Include the following line for an i686 or amd64 Build
 include $(X86DIR)/make.config
@@ -35,6 +37,8 @@ include $(X86DIR)/make.config
 include $(ARCHDIR)/make.config
 include $(KERNELDIR)/make.config
 include $(DATASTRUCTDIR)/make.config
+include $(MMDIR)/make.config
+include $(PROCDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
@@ -46,6 +50,8 @@ $(KERNEL_ARCH_OBJS) \
 $(KERNEL_X86_OBJS) \
 $(KERNEL_OBJS) \
 $(KERNEL_DATASTRUCT_OBJS) \
+$(KERNEL_PROC_OBJS) \
+$(KERNEL_MM_OBJS) \
 loader.o \
 kernel.o \
 

@@ -19,7 +19,7 @@ void PIT_8254_Phase(uint32_t hz)
 
 }
 
-void PIT_8254_Handler() 
+void PIT_8254_Handler(interrupt_context_t *int_ctx) 
 {
 	timer_ticks++;
 	if(timer_ticks % 1000 == 0)
