@@ -1,37 +1,43 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 char* itoa(int val,char *str, int base) 
 {
-	int i = 0;
-	bool isNegative = false;
+	char *p = str;
+	char *p1, *p2;
+	uint64_t ud = val;
 
-	if (val == 0)
+	int divisor = 10;
+
+	if ((base == 'd' || base == 10) && val < 0)
 	{
-		str[i++] = '0';
-		str[i] = '\0';
-		return str;
+		*p++ =  '-';
+		str++;
+		ud = -val;
+	}
+	else if ( base == 'x' || base == 16)
+	{
+		divisor = 16;
 	}
 
-	if (val < 0 && base == 10)
+	do
 	{
-		isNegative = true;
-		val = -val;
-	}
+		int remainder = ud % divisor;
+		*p++ = (remainder < 10 ) ? remainder + '0' : remainder + 'A' - 10;
+	} while (ud /= divisor);
 
-	while (val != 0)
+	*p = 0;
+
+	p1 = str;
+	p2 = p - 1;
+	while (p1 < p2)
 	{
-		int rem = val % base;
-		str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
-		val = val/base;
+		char tmp = *p1;
+		*p1 = *p2;
+		*p2 = tmp;
+		p1++;
+		p2--;
 	}
-
-	if(isNegative)
-	{
-		str[i++] = '-';
-	}
-
-	str[i] = '\0';
-	strreverse(str);
-	return str;
+	return p;
 }

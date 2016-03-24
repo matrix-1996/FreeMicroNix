@@ -178,22 +178,10 @@ void kprintf(const char *format, ...)
             switch(c)
             {
                 case 'd':
-                {
-                    itoa((int) arg++, buf, 10);
-                    p = buf;
-                    goto string;
-                    break;
-                }
                 case 'u':
-                {
-                    itoa((int) arg++, buf, 10);
-                    p = buf;
-                    goto string;
-                    break;
-                }
                 case 'x':
                 {
-                    itoa(*((int*) arg++), buf, 16);
+                    itoa(*((int*) arg++), buf, c);
                     p = buf;
 
                     goto string;
