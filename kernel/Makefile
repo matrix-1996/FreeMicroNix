@@ -26,6 +26,7 @@ LIBS:=$(LIBS) -nostdlib -lk -lgcc
 ARCHDIR:=i386
 X86DIR:=x86
 KERNELDIR:=kernel
+DATASTRUCTDIR:=datastruct
 
 # Include the following line for an i686 or amd64 Build
 include $(X86DIR)/make.config
@@ -33,7 +34,7 @@ include $(X86DIR)/make.config
 # The following lines are always included
 include $(ARCHDIR)/make.config
 include $(KERNELDIR)/make.config
-
+include $(DATASTRUCTDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
@@ -44,6 +45,7 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_X86_OBJS) \
 $(KERNEL_OBJS) \
+$(KERNEL_DATASTRUCT_OBJS) \
 loader.o \
 kernel.o \
 
