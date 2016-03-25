@@ -15,33 +15,35 @@ static uint32_t freemap_bytes = 0;
 static uint32_t freemap_cells = 0;
 static uint32_t freemap_pages = 0;
 
-static void *allocatable_memory_start = (void *) kernel_physical_end;
+static void *allocatable_memory_start;
 
 #define CELL_BITS (8*sizeof(*freemap))
 
 
 void Initialize_Memory(uint32_t mem_upper, uint32_t kernel_physical_end)
 {
-	pages_total = mem_upper / (PAGE_SIZE / KB)
+	allocatable_memory_start = (void *) kernel_physical_end;
+
+	pages_total = ( mem_upper ) / (PAGE_SIZE / 1024);
 	pages_free = pages_total;
 
 	freemap = allocatable_memory_start;
 	freemap_bits = pages_total;
-	freemap_bytes = 1 + (freemap_bits / 8);
-	freemap_cells = 1 + (freemap_bits/CELL_BITS);
-	freemap_pages = 1 + (freemap_bytes/PAGE_SIZE);
-
-	kprintf("Memory: %d bits %d bytes %d cells %d pages\n", freemap_bits, freemap_bytes, freemap_cells, freemap_pages);
+	freemap_bytes = 1 + freemap_bits / 8;
+	freemap_cells = 1 + freemap_bits/CELL_BITS;
+	freemap_pages = 1 + freemap_bytes/PAGE_SIZE;
 
 	memset(freemap, 0xff, freemap_bytes);
 
-	for (int i = 0; i < freemap_pages; i++)
+	for (uint32_t i = 0; i < freemap_pages; i++)
 	{
-		memory_alloc_page(false);
+		memory_alloc_page(0);
 	}
 
 	freemap[0] = 0x0; // Fix the VMware bug that doesn't allow ues of the page near 1MB
 
+
+	kprintf("Memory Manager Initialized\n");
 }
 
 
@@ -73,7 +75,7 @@ void *memory_alloc_page(bool zeroit)
 		{
 			for (uint32_t j = 0; j < CELL_BITS; j++)
 			{
-				cellmask = (1 << j);
+				cell_mask = (1 << j);
 
 				if ( freemap[i] & cell_mask )
 				{
@@ -111,6 +113,6 @@ void memory_free_page(void *page_addr)
 	uint32_t cell_offset = page_number%CELL_BITS;
 	uint32_t cell_mask = ( 1 << cell_offset);
 
-	freemap[cell_number] |= cellmask;
+	freemap[cell_number] |= cell_mask;
 	pages_free++;
 }

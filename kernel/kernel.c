@@ -55,10 +55,8 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 		mem_divisor = 1;
 	}
 
-	kprintf("\n")
-	kprintf("Available Memory: %d%s\n", mbi->mem_upper /mem_divisor, mem_suffix);							
+	kprintf("Available Memory: %d%s (%dKB)\n", mbi->mem_upper /mem_divisor, mem_suffix, mbi->mem_upper);
     kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / 1024, kernel_physical_end / 1024);
-
 
 
     Initialize_Memory(mbi->mem_upper, kernel_physical_end);	// Initiliazes memory management

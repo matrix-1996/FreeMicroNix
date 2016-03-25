@@ -52,7 +52,7 @@ typedef struct page_entry
 
 } page_entry_t;
 
-typedef page_directory
+typedef struct page_directory
 {
 	page_entry_t page_table[PAGE_TABLES];
 
@@ -60,7 +60,7 @@ typedef page_directory
 
 
 
-void Initialize_Paging(uint32_t mem_upper);
+void Initialize_Paging(page_directory_t *p, uint32_t mem_upper);
 int pagetable_getmap(page_directory_t *p, uint32_t vaddr, uint32_t *paddr);
 int pagetable_map(page_directory_t *p, uint32_t vaddr, uint32_t paddr, int flags);
 void pagetable_unmap( page_directory_t *p, uint32_t vaddr);

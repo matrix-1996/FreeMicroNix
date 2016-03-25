@@ -13,7 +13,7 @@ page_directory_t *page_directory_create(void)
 void Initialize_Paging(page_directory_t *p, uint32_t mem_upper)
 {
 	uint32_t stop = mem_upper * KB;
-	for (int i = 0; i < stop; i += PAGE_SIZE)
+	for (uint32_t i = 0; i < stop; i += PAGE_SIZE)
 	{
 		pagetable_map(p, i, i, PAGE_KERNEL | PAGE_READWRITE);
 	}
@@ -24,7 +24,7 @@ int pagetable_getmap(page_directory_t *p, uint32_t vaddr, uint32_t *paddr)
 	page_directory_t *d;
 	page_entry_t *e;
 
-	uint32_t a = vaddr >> 32;
+	uint32_t a = vaddr >> 22;
 	uint32_t b = (vaddr >> 12) & 0x3ff;
 
 	e = &p->page_table[a];
@@ -36,7 +36,7 @@ int pagetable_getmap(page_directory_t *p, uint32_t vaddr, uint32_t *paddr)
 
 	d = (page_directory_t *) (e->addr << 12);
 
-	e = &q->page_table[b];
+	e = &d->page_table[b];
 	if (!e->present)
 	{
 		return 0;
@@ -64,54 +64,54 @@ int pagetable_map(page_directory_t *p, uint32_t vaddr, uint32_t paddr, int flags
 		{
 			return 0;
 		}
+	}
 
-		e = &p->page_table[a];
+	e = &p->page_table[a];
 
-		if (!e->present)
+	if (!e->present)
+	{
+		d = page_directory_create();
+		if (!d)
 		{
-			d = page_directory_create();
-			if (!d)
-			{
-				return 0;
-			}
-
-
-			e->present = 1;
-			e->readwrite = 1;
-			e->priviledge = (flags & PAGE_KERNEL) ? 0 : 1;
-			e->writethrough = 0
-			e->nocache = 0;
-			e->accessed = 0;
-			e->dirty = 0;
-			e->pagesize = 0;
-			e->globalpage - (flags & PAGE_KERNEL) ? 1 : 0;
-			e->available = 0;
-			e->addr = (((uint32_t)d) >> 12);
-
+			return 0;
 		}
 
-		else
-		{
-			d = (page_directory_t*) (((uint32_t)e->addr) << 12);
-		}
-
-		e = &q->page_table[b];
 
 		e->present = 1;
-		e->readwrite = (flags & PAGE_READWRITE) ? 1 : 0;
-		e->priviledge = (flags & PAGE_KERNEL) ? 0 : 1;
-		e->writethrough = 0
+		e->readwrite = 1;
+		e->privilege = (flags & PAGE_KERNEL) ? 0 : 1;
+		e->writethrough = 0;
 		e->nocache = 0;
 		e->accessed = 0;
 		e->dirty = 0;
 		e->pagesize = 0;
-		e->globalpage - (flags & PAGE_KERNEL) ? 1 : 0;
-		e->available = (flags & PAGE_ALLOC) ? 1 : 0;
-		e->addr = (paddr >> 12);		
-
-		return 1;
+		e->globalpage = (flags & PAGE_KERNEL) ? 1 : 0;
+		e->available = 0;
+		e->addr = (((uint32_t)d) >> 12);
 
 	}
+
+	else
+	{
+		d = (page_directory_t*) (((uint32_t)e->addr) << 12);
+	}
+
+	e = &d->page_table[b];
+
+	e->present = 1;
+	e->readwrite = (flags & PAGE_READWRITE) ? 1 : 0;
+	e->privilege = (flags & PAGE_KERNEL) ? 0 : 1;
+	e->writethrough = 0;
+	e->nocache = 0;
+	e->accessed = 0;
+	e->dirty = 0;
+	e->pagesize = 0;
+	e->globalpage =(flags & PAGE_KERNEL) ? 1 : 0;
+	e->available = (flags & PAGE_ALLOC) ? 1 : 0;
+	e->addr = (paddr >> 12);		
+
+	return 1;
+
 
 }
 
@@ -128,7 +128,7 @@ void pagetable_unmap( page_directory_t *p, uint32_t vaddr)
 	if (e->present)
 	{
 		d = (page_directory_t *)(e->addr << 12);
-		e = &q->page_table[b];
+		e = &d->page_table[b];
 		e->present = 0;
 	}
 
@@ -151,7 +151,7 @@ void pagetable_delete(page_directory_t *p)
 
 			for (int j = 0; j < PAGE_TABLES; j++)
 			{
-				e = &d->entry[i];
+				e = &d->page_table[i];
 				if (e->present && e->available)
 				{
 					void *paddr;
@@ -180,7 +180,7 @@ void pagetable_alloc(page_directory_t *p, uint32_t vaddr, uint32_t length, int f
 		uint32_t paddr;
 		if (!pagetable_getmap(p,vaddr,&paddr))
 		{
-			pagetable_getmap(p, vaddr, 0, flags | PAGE_ALLOC);
+			pagetable_map(p, vaddr, 0, flags | PAGE_ALLOC);
 		}
 		vaddr += PAGE_SIZE;
 		npages--;
