@@ -10,7 +10,7 @@
 #define PAGE_PRESENT		1
 #define PAGE_ABSENT			0
 
-#define PAGE_READWRITE		1
+#define PAGE_READWRITE		4
 #define PAGE_READONLY		0
 
 #define PAGE_WRITETHROUGH	1
@@ -18,6 +18,8 @@
 
 #define PAGE_NOCACHE		1
 #define PAGE_CACHE			0
+
+#define PAGE_ALLOC			2
 
 #define PAGE_ACCESSED		1
 #define PAGE_NOTACCESSED	0
@@ -29,6 +31,7 @@
 #define PAGE_NOFLUSH		0
 
 #define PAGE_TABLES 1024
+
 
 typedef struct page_entry
 {
@@ -49,22 +52,25 @@ typedef struct page_entry
 
 } page_entry_t;
 
-typedef page_entry_t page_table_t;
-
-typdef struct page_directory
+typedef page_directory
 {
-	page_entry_t tables[PAGE_TABLES];
-	uint32_t tables_physical[PAGE_TABLES];
-	uint32_t phys_addr;
+	page_entry_t page_table[PAGE_TABLES];
 
 } page_directory_t;
 
-extern void page_directory_loader(uint32_t *page_dir);
-extern void paging_enable(void);
 
-void Initialize_Paging(void);
-void paging_map_address(void *physical_address, void *virtual_address, uint16_t flags);
-void paging_unmap_address(void *physical_address);
+
+void Initialize_Paging(uint32_t mem_upper);
+int pagetable_getmap(page_directory_t *p, uint32_t vaddr, uint32_t *paddr);
+int pagetable_map(page_directory_t *p, uint32_t vaddr, uint32_t paddr, int flags);
+void pagetable_unmap( page_directory_t *p, uint32_t vaddr);
+void pagetable_delete(page_directory_t *p);
+void pagetable_alloc(page_directory_t *p, uint32_t vaddr, uint32_t lenght, int flags);
+page_directory_t *page_directory_load(page_directory_t *p);
+void page_directory_refresh(void);
+
+
+
 
 
 #endif
