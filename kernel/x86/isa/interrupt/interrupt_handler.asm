@@ -129,7 +129,6 @@ Interrupt_IRQ_Set:
 
 
 extern Interrupt_Handler
-global IDT_ISR_Stub_Return
 IDT_ISR_Stub:
 	
 	pushad
@@ -146,8 +145,6 @@ IDT_ISR_Stub:
 	push eax
 	mov eax, Interrupt_Handler
 	call eax
-	
-IDT_ISR_Stub_Return:
 	pop eax
 	pop gs
 	pop fs
