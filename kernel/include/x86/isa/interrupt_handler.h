@@ -50,4 +50,7 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
+extern void IDT_ISR_Stub_Return();
+
+
 #endif

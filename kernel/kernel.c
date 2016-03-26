@@ -10,7 +10,8 @@
 #include <x86/isa/8254.h>
 #include <x86/isa/interrupt.h>
 #include <x86/gdt.h>
-
+#include <kernel/reboot.h>
+#include <kernel/panic.h>
 
 void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, uint32_t kernel_physical_start)
 {
@@ -59,10 +60,10 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / 1024, kernel_physical_end / 1024);
 
 
-    Initialize_Memory(mbi->mem_upper, kernel_physical_end);	// Initiliazes memory management
 
-
+    kprintf("Interrupts Enabled\n");
     Enable_Interrupts();
+
 
     kprintf("Waiting 5 seconds\n");
     PIT_8254_Wait(5000);
@@ -70,9 +71,11 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     
     kprintf("Testing Internal PC Speaker\nYou will hear a beep if present\n");
     Speaker_Beep();
+    reboot();
 
     kprintf("System Loaded\n");
+    
     for(;;){__asm__ __volatile__ ("hlt");}
 
-
 }
+

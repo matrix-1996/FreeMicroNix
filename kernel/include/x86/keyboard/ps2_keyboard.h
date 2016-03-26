@@ -1,7 +1,0 @@
-#ifndef _X86_KEYBOARD_PS2_KEYBOARD_H
-#define _X86_KEYBOARD_PS2_KEYBOARD_H
-
-
-
-
-#endif
