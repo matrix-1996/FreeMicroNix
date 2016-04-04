@@ -7,6 +7,7 @@
 #include <x86/isa/interrupt.h>
 #include <x86/isa/interrupt_handler.h>
 #include <x86/video/vga.h>
+#include <x86/io.h>
 #include <kernel/panic.h>
 
 const char * exception_messages[] = {
@@ -225,3 +226,4 @@ void Pause_Interrupts(void)
 	asm("sti");
 	asm("hlt");
 }
+

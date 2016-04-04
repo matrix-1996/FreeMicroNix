@@ -1,4 +1,4 @@
-#include <datastruct/list.h>
+#include <dstruct/list.h>
 
 void list_push_head(list_t *list, list_node_t *node)
 {

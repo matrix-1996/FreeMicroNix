@@ -4,7 +4,7 @@
 |  _|| | |  __/  __/ |  | | | (__| | | (_) | |\  | |>  < 
 |_|  |_|  \___|\___|_|  |_|_|\___|_|  \___/|_| \_|_/_/\_\
                                                          
-Version 0.11
+Version 0.12
 
 Working Features:
 	VGA Terminal Driver
@@ -20,6 +20,7 @@ Features In Progress:
 	Memory Paging
 	PS/2 Keyboard Driver
 	Bootloader
+	FM-FS (FreeMicroNix File System)
 
 Licensing Information
 	Read the attached LICENSE file for licensing information.

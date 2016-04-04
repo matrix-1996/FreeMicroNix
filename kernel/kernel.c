@@ -10,6 +10,7 @@
 #include <x86/isa/8254.h>
 #include <x86/isa/interrupt.h>
 #include <x86/gdt.h>
+#include <x86/rtc.h>
 #include <kernel/reboot.h>
 #include <kernel/panic.h>
 
@@ -34,7 +35,6 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     Terminal_Set_Color(COLOR_LIGHT_GREY);
 	
 	Initialize_PIT_8254();  			  // Initialize the 8254 Programmable Interval Timer
-	
 	Initialize_GDT();                     // Initialize the Global Descriptor Table
 
 	Install_IDT();					      // Install the Interrupt Descriptor Table
@@ -61,16 +61,34 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 
 
 
+    
+    Initialize_RTC();					  // Initialize the Real Time Clock Handler	
+
     kprintf("Interrupts Enabled\n");
     Enable_Interrupts();
 
+    RTC_Update();
+    rtc_time_t* rtctime = RTC_Get_Current_Time();
 
-    kprintf("Waiting 5 seconds\n");
-    PIT_8254_Wait(5000);
-    kprintf("Waited 5 seconds\n");
+    char *ampm;
+    if (rtctime->am)
+    {
+    	ampm = "AM";
+    }
+    else ampm = "PM";
+
+    kprintf("RTC Reported Time: %d:%d:%d %s %d/%d/%d UTC\n",rtctime->hours, rtctime->minutes, rtctime->seconds, ampm, rtctime->month, rtctime->day, rtctime->year);
+
+    kprintf("Testing Programmable Interval Timer: Waiting 2 seconds\n");
+    PIT_8254_Wait(2000);
+    kprintf("Waited 2 seconds\n");
     
+    kprintf("RTC Ticks: %d\n",Get_RTC_Ticks());
+
     kprintf("Testing Internal PC Speaker\nYou will hear a beep if present\n");
     Speaker_Beep();
+
+
     reboot();
 
     kprintf("System Loaded\n");

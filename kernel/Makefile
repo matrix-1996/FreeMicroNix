@@ -24,9 +24,10 @@ LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 ARCHDIR:=i686
+FSDIR:=fs
 X86DIR:=x86
 KERNELDIR:=kernel
-DATASTRUCTDIR:=datastruct
+DSTRUCTDIR:=dstruct
 MMDIR:=mm
 PROCDIR:=proc
 
@@ -35,8 +36,9 @@ include $(X86DIR)/make.config
 
 # The following lines are always included
 include $(ARCHDIR)/make.config
+include $(FSDIR)/make.config
 include $(KERNELDIR)/make.config
-include $(DATASTRUCTDIR)/make.config
+include $(DSTRUCTDIR)/make.config
 include $(MMDIR)/make.config
 include $(PROCDIR)/make.config
 
@@ -49,7 +51,7 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_X86_OBJS) \
 $(KERNEL_OBJS) \
-$(KERNEL_DATASTRUCT_OBJS) \
+$(KERNEL_DSTRUCT_OBJS) \
 $(KERNEL_PROC_OBJS) \
 $(KERNEL_MM_OBJS) \
 loader.o \
