@@ -62,22 +62,16 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 
 
     
-    Initialize_RTC();					  // Initialize the Real Time Clock Handler	
 
     kprintf("Interrupts Enabled\n");
     Enable_Interrupts();
 
+    Initialize_RTC();					  // Initialize the Real Time Clock Handler
+
     RTC_Update();
     rtc_time_t* rtctime = RTC_Get_Current_Time();
 
-    char *ampm;
-    if (rtctime->am)
-    {
-    	ampm = "AM";
-    }
-    else ampm = "PM";
-
-    kprintf("RTC Reported Time: %d:%d:%d %s %d/%d/%d UTC\n",rtctime->hours, rtctime->minutes, rtctime->seconds, ampm, rtctime->month, rtctime->day, rtctime->year);
+    kprintf("RTC Reported Time: %d:%d:%d %d/%d/%d UTC\n",rtctime->hour, rtctime->minute, rtctime->second, rtctime->month, rtctime->day, rtctime->year);
 
     kprintf("Testing Programmable Interval Timer: Waiting 2 seconds\n");
     PIT_8254_Wait(2000);

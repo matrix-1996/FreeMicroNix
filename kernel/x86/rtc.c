@@ -1,115 +1,120 @@
 #include <x86/rtc.h>
 #include <x86/video/vga.h>
 
-
 uint32_t rtc_ticks = 0;
 rtc_time_t* rtc_current;
-rtc_time_t*	rtc_last;
 bool rtc_update_in_progress = false;
 
+enum {
+    cmos_address = 0x70,
+    cmos_data = 0x71
+};
 
-static bool RTC_read_update_in_progress(void)
+int RTC_Get_Update_In_Progress_Flag(void)
 {
-	return CMOS_Read(0x0A) >> 7;	// 8th bit indictates if update in progress
+    outb(cmos_address, 0x0A);
+    return (inb(cmos_data) & 0x80);
 }
 
-static void RTC_wait_update_in_progress(void)
+uint8_t RTC_Get_Register(int reg)
 {
-	do
-	{
-		rtc_update_in_progress = RTC_read_update_in_progress();
-	}while(rtc_update_in_progress == true);
+    outb(cmos_address, reg);
+    return inb(cmos_data);
 }
 
-static int RTC_bcd_binary_conv(int toconv)
-{
-	return (toconv & 0x0F) + ((toconv / 16) * 10);
-}
+
 
 void RTC_Update(void)
 {
-	bool rtc_bcd = (CMOS_Read(0x0B) == 2) ? (true) : (false);
-	bool rtc_24hr = (CMOS_Read(0x0B) == 4) ? (true) : (false);
-	
-	uint8_t century_register = 0x32;	// 21st century skitzoid man!!!
-	//uint8_t century_register = 0;
+
+    uint8_t century;
+    uint8_t last_second;
+    uint8_t last_minute;
+    uint8_t last_hour;
+    uint8_t last_day;
+    uint8_t last_month;
+    uint8_t last_year;
+    uint8_t last_century;
+    uint8_t registerB;
+
+
+    while (RTC_Get_Update_In_Progress_Flag());
+    
+    rtc_current->second = RTC_Get_Register(0x00);
+    rtc_current->minute = RTC_Get_Register(0x02);
+    rtc_current->hour = RTC_Get_Register(0x04);
+    rtc_current->day = RTC_Get_Register(0x07);
+    rtc_current->month = RTC_Get_Register(0x08);
+    rtc_current->year = RTC_Get_Register(0x09);
+
+    int century_register = 0x00; 
+    //int century_register = 0x32;
+
+    if(century_register != 0)
+    {
+        century = RTC_Get_Register(century_register);
+    }
 
 	do
 	{
-		rtc_last = rtc_current;
+        last_second = rtc_current->second;
+        last_minute = rtc_current->minute;
+        last_hour = rtc_current->hour;
+        last_month = rtc_current->month;
+        last_year = rtc_current->year;
+        last_century = century;
 
-		RTC_wait_update_in_progress();
+        while(RTC_Get_Update_In_Progress_Flag());
 
-		rtc_current->seconds = CMOS_Read(0x00);
-		rtc_current->minutes = CMOS_Read(0x02);
-		rtc_current->hours = CMOS_Read(0x04);
-		rtc_current->weekday = CMOS_Read(0x06);
-		rtc_current->day = CMOS_Read(0x07);
-		rtc_current->month = CMOS_Read(0x08);
-		rtc_current->year = CMOS_Read(0x09);
+        rtc_current->second = RTC_Get_Register(0x00);
+        rtc_current->minute = RTC_Get_Register(0x02);
+        rtc_current->hour = RTC_Get_Register(0x04);
+        rtc_current->day = RTC_Get_Register(0x07);
+        rtc_current->month =  RTC_Get_Register(0x08);
+        rtc_current->year = RTC_Get_Register(0x09);
 
 		if (century_register != 0)
 		{
-			rtc_current->century = CMOS_Read(century_register);
+			century = RTC_Get_Register(century_register);
 		}
-	} while((rtc_current->seconds != rtc_last->seconds)
-        || (rtc_current->minutes != rtc_last->minutes)
-        || (rtc_current->hours != rtc_last->hours)
-        || (rtc_current->weekday != rtc_last->weekday)
-        || (rtc_current->day != rtc_last->day)
-        || (rtc_current->month != rtc_last->month)
-        || (rtc_current->year != rtc_last->year)
-        || (rtc_current->century != rtc_last->century));
+	} while(    (last_second != rtc_current->second) || (last_minute != rtc_current->minute) || (last_hour != rtc_current->hour) ||
+                (last_day != rtc_current->day) || (last_month != rtc_current->month) || (last_year != rtc_current->year ) || 
+                (last_century != century) );
+    registerB = RTC_Get_Register(0x0B);
 
-	// Binary Conversions
-	if (rtc_bcd)
-	{
-        rtc_current->seconds    = RTC_bcd_binary_conv(rtc_current->seconds);
-        rtc_current->minutes    = RTC_bcd_binary_conv(rtc_current->minutes);
-        rtc_current->hours      = RTC_bcd_binary_conv(rtc_current->hours);
-        rtc_current->day        = RTC_bcd_binary_conv(rtc_current->day);
-        rtc_current->month      = RTC_bcd_binary_conv(rtc_current->month);
-        rtc_current->year       = RTC_bcd_binary_conv(rtc_current->year);
-
+    if (!(registerB & 0x04))
+    {
+        rtc_current->second = ( rtc_current->second & 0x0F ) + ((rtc_current->second / 16) * 10);
+        rtc_current->minute = ( rtc_current->minute & 0x0F ) + ((rtc_current->minute / 16) * 10);
+        rtc_current->hour = ( (rtc_current->hour & 0x0F) + (((rtc_current->hour & 0x70) / 16 ) * 10 )  | (rtc_current->hour & 0x80));
+        rtc_current->day = ((rtc_current->day & 0x0F ) + ((rtc_current->day & 0x70) / 16) * 10);
+        rtc_current->month = (rtc_current->month & 0x0F) + ((rtc_current->month / 16) * 10);
+        rtc_current->year = (rtc_current->year & 0x0F) + ((rtc_current->year / 16) * 10);
         if (century_register != 0)
         {
-        	rtc_current->century = RTC_bcd_binary_conv(rtc_current->century);
+            century = (century & 0x0F) + ((century / 16) * 10);            
         }
     }
 
-    else if (rtc_24hr)
+    if (!(registerB & 0x02) && ( rtc_current->hour & 0x80))
     {
-    	if (rtc_current->hours & 0x80)
-    	{
-    		rtc_current->hours = ((rtc_current->hours & 0x7F) + 12) % 24;
-    		rtc_current->am = false;
-    	}
+        rtc_current->hour = ((rtc_current->hour & 0x7F) + 12) % 24;
+    }
 
-    	else
-    	{
-    		rtc_current->am = true;
-    	}
-
+    if (!(registerB & 0x02) && (rtc_current->hour & 0x80))
+    {
+        rtc_current->hour= ((rtc_current->hour & 0x7F) + 12) % 24;
     }
 
     if (century_register != 0)
     {
-    	uint16_t temp = rtc_current-> year + rtc_current->century * 100;
-    	if (temp < RTC_SANITY_CHECK_YEAR_LOW)
-    	{
-    		rtc_current->year += 2000;
-
-    	}
-    	else if (temp > RTC_SANITY_CHECK_YEAR_HIGH)
-    	{
-    		rtc_current->year += 2000;
-    	}
-    	else
-    	{
-    		rtc_current->year = temp;
-    	}
+        rtc_current->year += century * 100;
     }
-
+    else
+    {
+        rtc_current += (CURRENT_YEAR / 100) * 100;
+        if (rtc_current->year < CURRENT_YEAR) rtc_current->year += 100;
+    }
 }
 
 rtc_time_t* RTC_Get_Current_Time(void)
