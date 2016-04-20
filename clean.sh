@@ -9,3 +9,4 @@ done
 rm -rfv sysroot
 rm -rfv isodir
 rm -rfv freemicronix.iso
+
