@@ -7,7 +7,7 @@ mkdir -p toolchain/bin
 # Set the software versions
 export BINVER='2.26'
 export GCCVER='5.3.0'
-export THEADS='4'
+export THEADS='1'
 
 # Set the env variables
 export PREFIX=$(pwd)/tools
