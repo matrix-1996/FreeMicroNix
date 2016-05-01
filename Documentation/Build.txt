@@ -6,9 +6,7 @@ instructions in Dependancies.txt
 Step 1) Setting up enviornment Variables
 	A) Copy and paste the following into a terminal:
 
-	export PREFIX="$HOME/opt/cross"
-	export TARGET=i686-elf
-	export PATH="$PREFIX/bin:$PATH"
+	export PATH="$(PWD)/tools/bin:$PATH"
 
 Step 2) Clean the old build
 	A) Change directory to the freemicronix project root

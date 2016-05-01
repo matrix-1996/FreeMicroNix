@@ -2,12 +2,10 @@
 set -ex
 
 mkdir -p toolchain/src
-mkdir -p toolchain/bin
 
 # Set the software versions
 export BINVER='2.26'
 export GCCVER='5.3.0'
-export THEADS='1'
 
 # Set the env variables
 export PREFIX=$(pwd)/tools
@@ -32,15 +30,16 @@ mkdir -p build-gcc
 
 cd build-binutils
 ../binutils-$BINVER/configure --target=$TARGET --prefix=$PREFIX --with-sysroot --disable-nls --disable-werror
-make -j$THREADS
+make
 make install
+
 cd ../gcc-$GCCVER
 contrib/download_prerequisites
 
 cd ../build-gcc
 ../gcc-$GCCVER/configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c,c++ --without-headers
-make -j$THREADS all-gcc
-make -j$THREADS all-target-libgcc
+make all-gcc
+make all-target-libgcc
 make install-gcc
 make install-target-libgcc
 
