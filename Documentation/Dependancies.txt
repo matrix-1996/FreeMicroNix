@@ -1,12 +1,16 @@
 Dependancies:
 
-The most current version of Ubuntu is reccommended,
-however any Unix-like OS with the required tools will probably work
+The most current version of Arch Linux is reccommended,
+however any nix OS with the required tools will probably work
 
 What to install:
 1) i686-elf cross compiler toolchain
 	A) run the build-toolchain.sh script
 
 2) nasm assembler
-	A) Obtaining it:
-		for Ubuntu or debian, run "sudo apt-get install nasm"
+	A) for Arch, run "pacman -S nasm"
+3) mtools
+	A) for Arch, run "pacman -S mtools"
+
+4) xorriso
+	A) for Arch, run "pacman -S xorriso"

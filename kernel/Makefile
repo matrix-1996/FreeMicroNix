@@ -1,10 +1,6 @@
 # This makefile is configured for an i686 Build
 # Please Reconfigure for an amd64 Build
 
-HOST?=$(shell ../default-host.sh)
-HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
-
-AS=nasm
 AFLAGS=-f elf32 
 
 CFLAGS?=-O2 -g -std=gnu11 
@@ -13,9 +9,9 @@ LDFLAGS?=
 LIBS?=
 
 DESTDIR?=
-PREFIX?=/usr/local
+PREFIX?=/usr
 EXEC_PREFIX?=$(PREFIX)
-BOOTDIR?=$(EXEC_PREFIX)/boot
+BOOTDIR?=/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra
@@ -23,7 +19,6 @@ CPPFLAGS:=$(CPPFLAGS) -D__is_freemicronix_kernel -Iinclude
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
-ARCHDIR:=i686
 FSDIR:=fs
 X86DIR:=x86
 KERNELDIR:=kernel

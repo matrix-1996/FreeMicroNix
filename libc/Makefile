@@ -1,7 +1,3 @@
-HOST?=$(shell ../default-host.sh)
-HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
-
-AS=nasm
 AFLAGS=-f elf32
 
 CFLAGS?=-O2 -g
@@ -10,7 +6,7 @@ LDFLAGS?=
 LIBS?=
 
 DESTDIR?=
-PREFIX?=/usr/local
+PREFIX?=/usr
 EXEC_PREFIX?=$(PREFIX)
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
@@ -19,8 +15,6 @@ CFLAGS:=$(CFLAGS) -Wall -Wextra
 CPPFLAGS:=$(CPPFLAGS) -D__is_freemicronix_libc -Iinclude
 LIBK_CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_freemicronix_kernel
-
-ARCHDIR:=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
