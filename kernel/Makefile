@@ -33,7 +33,6 @@ include $(X86DIR)/make.config
 include $(ARCHDIR)/make.config
 include $(FSDIR)/make.config
 include $(KERNELDIR)/make.config
-include $(DSTRUCTDIR)/make.config
 include $(MMDIR)/make.config
 include $(PROCDIR)/make.config
 
@@ -46,7 +45,6 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_X86_OBJS) \
 $(KERNEL_OBJS) \
-$(KERNEL_DSTRUCT_OBJS) \
 $(KERNEL_PROC_OBJS) \
 $(KERNEL_MM_OBJS) \
 loader.o \
