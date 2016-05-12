@@ -47,6 +47,10 @@ global isr28
 global isr29
 global isr30
 global isr31
+
+global isr120
+global isr121
+
 global irq0
 global irq1
 global irq2
@@ -125,6 +129,8 @@ Interrupt_Exception_Set:
 	isr 29
 	isr_error 30
 	isr 31
+	isr 120		; Ring 0 to Ring 3
+	isr 121		; Ring 3 to Ring 0
 
 Interrupt_IRQ_Set:
 	irq 0
@@ -147,7 +153,7 @@ Interrupt_IRQ_Set:
 
 extern Interrupt_Handler
 IDT_ISR_Stub:
-	
+
 	pushad
 	push ds
 	push es

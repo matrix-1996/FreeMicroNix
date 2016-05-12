@@ -40,6 +40,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define NUM_INTERRUPTS 256
 
+#define SEG_KTEXT	1
+#define SEG_KDATA	2
+#define SEG_UTEXT	3
+#define SEG_UDATA	4
+#define SET_TSS		5
+
+#define GD_KTEXT	((SEG_KTEXT) << 3)
+#define GD_KDATA	((SEG_KDATA) << 3)
+#define GD_UTEXT	((SEG_UTEXT) << 3)
+#define GD_UDATA	((SEG_UDATA) << 3)
+#define GD_TSS		((SEG_TSS) << 3)
+
+#define DPL_KERNEL	(0)
+#define DPL_USER	(3)
+
+#define KERNEL_CS	(GD_KTEXT | DPL_KERNEL)
+#define KERNEL_DS	(GD_KDATA | DPL_KERNEL)
+#define USER_CS		(GD_UTEXT | DPL_USER)
+#define USER_DS		(GD_KDATA | DPL_USER)
+
 
 /*
 PC Interrupts:
@@ -81,6 +101,8 @@ void Disable_Interrupt(uint32_t irq);
 void Disable_Interrupts(void);
 void Enable_Interrupts(void);
 void Pause_Interrupts(void);
-
+void STU_Handler(interrupt_context_t* int_ctx);
+void STK_Handler(interrupt_context_t* int_ctx);
+void Install_Syscall_Handler(void);
 
 #endif

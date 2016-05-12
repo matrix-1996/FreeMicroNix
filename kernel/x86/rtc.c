@@ -151,7 +151,7 @@ void RTC_Handler(interrupt_context_t *int_ctx)
 
 void Initialize_RTC(void)
 {
-	Install_Interrupt_Handler(8, RTC_Handler);	// Install the handler
+	Install_Interrupt_Handler(IRQ8, RTC_Handler);	// Install the handler
 	Disable_Interrupts();
 	outb(0x70, 0x8B);		// Select register B and disable NMI
 	char prev = inb(0x71);	// Read the current value of register B

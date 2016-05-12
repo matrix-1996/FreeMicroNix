@@ -78,11 +78,13 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     kprintf("Kernel loaded from 0x%x-0x%x (%dKB-%dKB)\n", kernel_physical_start, kernel_physical_end, kernel_physical_start / 1024, kernel_physical_end / 1024);
 
 
-
-    
-
     kprintf("Interrupts Enabled\n");
     Enable_Interrupts();
+
+    Install_Syscall_Handler();
+
+    asm("int 120");
+    asm("int 121");
 
     Initialize_RTC();					  // Initialize the Real Time Clock Handler
 

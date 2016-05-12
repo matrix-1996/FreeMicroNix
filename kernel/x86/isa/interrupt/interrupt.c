@@ -63,21 +63,77 @@ const char * exception_messages[] = {
 	"Reserved",
 };
 
-void *IRQ_Routines[16] = {
+void *Interrupt_Routines[256] = {
 	0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+
 };
 
 void Install_Interrupt_Handler(uint32_t index, void(*handler) (interrupt_context_t* r))
 {
-	IRQ_Routines[index] = handler;
+	Interrupt_Routines[index] = handler;
 
 }
 
 void Uninstall_Interrupt_Handler(uint32_t index)
 {
-	IRQ_Routines[index] = 0;
+	Interrupt_Routines[index] = 0;
 }
+
+/******************Mode Switch Test*****************************/
+
+void STU_Handler(interrupt_context_t* int_ctx){
+	if((int_ctx->int_no & 0x03) != 3){
+		int_ctx->gs = int_ctx->es = int_ctx->fs = int_ctx->ds = int_ctx->ss = USER_DS;
+		int_ctx->cs = USER_CS;
+		int_ctx->eflags |= 0x00003000;
+	}
+}
+
+void STK_Handler(interrupt_context_t* int_ctx){
+	if((int_ctx->int_no & 0x03) != 0){
+		int_ctx->gs = int_ctx->es = int_ctx->fs = int_ctx->ds = int_ctx->ss = KERNEL_DS;
+		int_ctx->cs = KERNEL_CS;
+	}
+}
+
+/************************************************/
+
+void Install_Syscall_Handler(void){
+	Install_Interrupt_Handler(120, STU_Handler);
+	Install_Interrupt_Handler(121, STK_Handler);
+}
+
 
 void Page_Fault_Handler(void)
 {
@@ -109,19 +165,17 @@ void IRQ_Handler(interrupt_context_t* int_ctx)
 
 	void(*handler)(interrupt_context_t* int_ctx);
 
-	uint8_t irq = int_ctx->int_no - 32;
-
 	//kprintf("IRQ: %x\n",irq);
 
-	handler = IRQ_Routines[irq];
+	handler = Interrupt_Routines[int_ctx->int_no];
 	
-	if ( irq == 7 && !(PIC_Read_ISR() & (1 << 7)) )
+	if ( int_ctx->int_no == IRQ7 && !(PIC_Read_ISR() & (1 << 7)) )
 	{
 		return;
 	}
 
 
-	if ( irq == 15 && !(PIC_Read_ISR() & (1 << 15)) )
+	if ( int_ctx->int_no == IRQ15 && !(PIC_Read_ISR() & (1 << 15)) )
 	{
 		return PIC_EOI_Master();
 	}
@@ -131,7 +185,7 @@ void IRQ_Handler(interrupt_context_t* int_ctx)
 		handler(int_ctx);
 	}
 
-	if (irq >= 8)
+	if (int_ctx->int_no >= IRQ8)
 	{
 		PIC_EOI_Slave();
 	}
@@ -201,7 +255,15 @@ void Interrupt_Handler_Installer(void)
 	Create_IDT_Entry(45, (uint32_t) irq13, 0x08, 0x8E);
 	Create_IDT_Entry(46, (uint32_t) irq14, 0x08, 0x8E);
 	Create_IDT_Entry(47, (uint32_t) irq15, 0x08, 0x8E);
-	
+
+	// add system calls
+	// 2 most significant bits are DPL
+	// if ring 3 wants to get ring 0 handler its not option
+	// Kenerl stuff = 0x1000 1110 = 0x8E
+	// User   stuff = 0x1110 1110 = 0xBE
+	Create_IDT_Entry(120, (uint32_t)isr120,0x08,0x8E);
+	Create_IDT_Entry(121, (uint32_t)isr120,0x08,0xBE);
+
 	kprintf("Interrupt Handlers Installed\n");
 }
 
