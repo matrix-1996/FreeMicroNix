@@ -18,10 +18,7 @@ BITS 16
 
 jmp short _begin
 
-
-
-
-
+bootmsg db "FreeMicroBoot",0xD,0xA,"Version 0.01",0
 
 _begin:
 	mov ax, 07C0h		; move 0x7c00 into ax
@@ -29,8 +26,8 @@ _begin:
 	
 	call clear_screen
 	
-	;mov si, bootmsg
-	;call print_string
+	mov si, bootmsg
+	call print_string
 
 	jmp $
 
@@ -40,6 +37,17 @@ clear_screen:
 	int 0x10		; BIOS video interrupt
 	ret
 
+print_string:
+	
+	lodsb 			; Load String
+	or al, al		; check if 0
+	jz done			
+	mov ah, 0xE
+	int 0x10		; BIOS video interrupt
+	jmp print_string
+
+done:
+	ret
 
 	times 510-($-$$) db 0	; Pad remainder of boot sector with 0s
 	dw 0xAA55				; The standard PC boot signature

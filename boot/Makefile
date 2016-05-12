@@ -32,3 +32,6 @@ img: stage1/stage1.asm
 
 qemu: img
 	qemu-system-i386 -fda stage1.img
+
+clean:
+	rm -rf stage1.img
