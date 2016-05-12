@@ -113,6 +113,7 @@ void Uninstall_Interrupt_Handler(uint32_t index)
 /******************Mode Switch Test*****************************/
 
 void STU_Handler(interrupt_context_t* int_ctx){
+	kprintf("Switching to user mode\n");
 	if((int_ctx->int_no & 0x03) != 3){
 		int_ctx->gs = int_ctx->es = int_ctx->fs = int_ctx->ds = int_ctx->ss = USER_DS;
 		int_ctx->cs = USER_CS;
@@ -121,6 +122,7 @@ void STU_Handler(interrupt_context_t* int_ctx){
 }
 
 void STK_Handler(interrupt_context_t* int_ctx){
+	kprintf("Switching to kernel mode\n");
 	if((int_ctx->int_no & 0x03) != 0){
 		int_ctx->gs = int_ctx->es = int_ctx->fs = int_ctx->ds = int_ctx->ss = KERNEL_DS;
 		int_ctx->cs = KERNEL_CS;

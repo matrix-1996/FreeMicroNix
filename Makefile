@@ -72,3 +72,6 @@ qemu: iso
 
 qemu-enable-kvm: iso
 	qemu-system-i386 -rtc base=localtime -enable-kvm -cdrom freemicronix.iso
+
+boot:
+	$(MAKE) -C boot qemu

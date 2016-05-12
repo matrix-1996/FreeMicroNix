@@ -83,9 +83,7 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 
     Install_Syscall_Handler();
 
-    asm("int 120");
-    asm("int 121");
-
+    /*
     Initialize_RTC();					  // Initialize the Real Time Clock Handler
 
     RTC_Update();
@@ -93,6 +91,8 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
 
     kprintf("RTC Reported Time: %d:%d:%d %d/%d/%d UTC\n",rtctime->hour, rtctime->minute, rtctime->second, rtctime->month, rtctime->day, rtctime->year);
 
+	*/
+	
     kprintf("Testing Programmable Interval Timer: Waiting 2 seconds\n");
     PIT_8254_Wait(2000);
     kprintf("Waited 2 seconds\n");
@@ -102,11 +102,14 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     kprintf("Testing Internal PC Speaker\nYou will hear a beep if present\n");
     Speaker_Beep();
 
-
-    reboot();
-
     kprintf("System Loaded\n");
     
+
+    __asm__ __volatile__ ("int $0x78");
+    __asm__ __volatile__ ("int $0x79");
+
+
+
     for(;;){__asm__ __volatile__ ("hlt");}
 
 }
