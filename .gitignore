@@ -5,4 +5,4 @@ toolchain
 *.iso
 *.o
 *.kernel
-
+*.img

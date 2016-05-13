@@ -81,7 +81,7 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     kprintf("Interrupts Enabled\n");
     Enable_Interrupts();
 
-    Install_Syscall_Handler();
+    //Install_Syscall_Handler();
 
     /*
     Initialize_RTC();					  // Initialize the Real Time Clock Handler
@@ -105,8 +105,6 @@ void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, ui
     kprintf("System Loaded\n");
     
 
-    __asm__ __volatile__ ("int $0x78");
-    __asm__ __volatile__ ("int $0x79");
 
 
 
