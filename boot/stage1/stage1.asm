@@ -18,7 +18,8 @@ BITS 16
 
 jmp short _begin
 
-bootmsg db "FreeMicroBoot",0xD,0xA,"Version 0.01",0
+bootmsg db "FreeMicroBoot",0xD,0xA,"Version 0.01",0xD,0xA,0
+bday db "Happy Birthday Mom",0xD,0xA,0
 
 _begin:
 	mov ax, 07C0h		; move 0x7c00 into ax
@@ -27,6 +28,9 @@ _begin:
 	call clear_screen
 	
 	mov si, bootmsg
+	call print_string
+
+	mov si, bday
 	call print_string
 
 	jmp $
