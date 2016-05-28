@@ -32,9 +32,14 @@ help:
 	@echo ""
 	@echo "Options:"
 	@echo ""
+	@echo "build - builds an elf kernel file of FreeMicroNix"
+	@echo "debug - builds an elf kernel file of FreeMicroNix with debugging symbols"
 	@echo "iso - builds a bootable .iso file of FreeMicroNix"
+	@echo "iso-debug - builds a bootable iso file of freemicronix with debugging symbols"
 	@echo "qemu - runs FreeMicroNix in qemu"
 	@echo "qemu-enable-kvm - runs FreeMicroNix in qemu with the switch -enable-kvm"
+	@echo "qemu - runs FreeMicroNix in qemu with debugging symbols"
+	@echo "qemu-enable-kvm - runs FreeMicroNix in qemu with the switch -enable-kvm with debugging symbols"
 	@echo "clean - cleans up object files and removes the sysroot and isodir directories"
 
 clean:
@@ -53,6 +58,12 @@ headers:
 build: headers
 	$(MAKE) -C libc install
 	$(MAKE) -C kernel install
+	strip kernel/freemicronix.kernel -o kernel/freemicronix.kernel
+
+debug: headers
+	$(MAKE) -C libc install
+	$(MAKE) -C kernel install
+
 
 
 iso: build
@@ -66,6 +77,8 @@ iso: build
 	grub-mkrescue -o freemicronix.iso isodir
 
 
+iso-debug: debug
+
 
 qemu: iso
 	qemu-system-i386 -rtc base=localtime -cdrom freemicronix.iso
@@ -73,5 +86,8 @@ qemu: iso
 qemu-enable-kvm: iso
 	qemu-system-i386 -rtc base=localtime -enable-kvm -cdrom freemicronix.iso
 
-boot:
-	$(MAKE) -C boot qemu
+qemu-debug: iso-debug
+	qemu-system-i386 -rtc base=localtime -cdrom freemicronix.iso
+
+qemu-debug-enable-kvm: iso-debug
+	qemu-system-i386 -rtc base=localtime -enable-kvm -cdrom freemicronix.iso
