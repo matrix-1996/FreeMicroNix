@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include <x86/isa/idt.h>
-#include <x86/isa/interrupt.h>
+#include <x86/isa/interrupt/idt.h>
+#include <x86/isa/interrupt/interrupt.h>
 #include <x86/video/vga.h>
 #include <string.h>
 #include <stdint.h>

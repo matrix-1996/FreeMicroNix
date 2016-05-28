@@ -23,10 +23,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <x86/multiboot.h>
 #include <x86/video/vga.h>
 #include <x86/sound/speaker.h>
-#include <x86/isa/idt.h>
+#include <x86/isa/interrupt/idt.h>
+#include <x86/isa/interrupt/interrupt.h>
 #include <x86/isa/8259.h>
 #include <x86/isa/8254.h>
-#include <x86/isa/interrupt.h>
 #include <x86/gdt.h>
 #include <x86/rtc.h>
 #include <kernel/reboot.h>

@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef _X86_RTC_H
 #define _X86_RTC_H
 
-#include <x86/isa/interrupt.h>
+#include <x86/isa/interrupt/interrupt.h>
 #include <stdint.h>
 #include <x86/io.h>
 #include <stdbool.h>

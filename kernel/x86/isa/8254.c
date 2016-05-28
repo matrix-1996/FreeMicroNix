@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdbool.h>
 #include <x86/isa/8259.h>
 #include <x86/isa/8254.h>
-#include <x86/isa/interrupt.h>
+#include <x86/isa/interrupt/interrupt.h>
 #include <x86/video/vga.h>
 #include <x86/io.h>
 
