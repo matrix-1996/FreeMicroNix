@@ -18,7 +18,7 @@ BITS 16
 
 jmp short _begin
 
-bootmsg db "FreeMicroBoot",0xD,0xA,"Version 0.01",0
+bootmsg db "FreeMicroBoot",0xD,0xA,"Version 0.01",0xD,0xA,0
 
 _begin:
 	mov ax, 07C0h		; move 0x7c00 into ax

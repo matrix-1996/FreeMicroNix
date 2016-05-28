@@ -16,7 +16,7 @@
 
 AFLAGS=-f elf32 
 
-CFLAGS?=-O2 -g -std=gnu11 
+CFLAGS?=-O2 -std=gnu11 -g
 CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
