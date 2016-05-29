@@ -103,6 +103,6 @@ void Enable_Interrupts(void);
 void Pause_Interrupts(void);
 void STU_Handler(interrupt_context_t* int_ctx);
 void STK_Handler(interrupt_context_t* int_ctx);
-void Install_Syscall_Handler(void);
+void Install_Syscall_Handler(uint32_t index, void(*handler) (interrupt_context_t* r));
 
 #endif

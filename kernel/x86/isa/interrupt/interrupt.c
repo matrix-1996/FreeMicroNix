@@ -115,7 +115,8 @@ void STK_Handler(interrupt_context_t* int_ctx){
 
 /************************************************/
 
-void Install_Syscall_Handler(void){
+void Install_Syscall_Handler(uint32_t index, void(*handler) (interrupt_context_t* r))
+{
 	Install_Interrupt_Handler(120, STU_Handler);
 	Install_Interrupt_Handler(121, STK_Handler);
 }
