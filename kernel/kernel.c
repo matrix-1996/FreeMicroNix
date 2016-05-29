@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <kernel/reboot.h>
 #include <kernel/panic.h>
 
-void kmain(uint32_t magic, uint32_t mboot_addr, uint32_t kernel_physical_end, uint32_t kernel_physical_start)
+void kmain(uint32_t magic, uint32_t mboot_addr)
 {
 	multiboot_info_t* mbi;
 	Initialize_Terminal();

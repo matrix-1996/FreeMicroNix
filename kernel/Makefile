@@ -81,12 +81,12 @@ $(CRTEND_OBJ) \
 $(CRTN_OBJ) \
 
 
-all: freemicronix.kernel
+all: i686-kernel
 
-.PHONY: all clean install install-headers install-kernel
+.PHONY: all i686-kernel clean install install-headers install-kernel 
 
-freemicronix.kernel: $(OBJ_LINK_LIST) link.ld
-			$(CC) -T link.ld -o $@ $(CFLAGS) $(OBJ_LINK_LIST) $(LDFLAGS) $(LIBS)
+i686-kernel: $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld
+			$(CC) -T $(ARCHDIR)/linker.ld -o freemicronix.kernel $(CFLAGS) $(OBJ_LINK_LIST) $(LDFLAGS) $(LIBS)
 %.o: %.c
 	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
