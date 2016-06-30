@@ -25,7 +25,6 @@ STACKSIZE equ 0x8000
 K_OFFSET_ADDR equ 0xC0000000
 K_PAGE_NUMBER equ (K_OFFSET_ADDR >> 22)
 
-
 ; Setup the multiboot header
 
 MBALIGN     equ  1<<0                  
@@ -49,7 +48,7 @@ _pageDirectory:
     times (K_PAGE_NUMBER - 1) dd 0	; Pages before kernel space
     ; This page directery entry defines a 4MB page containing the kernel
     dd 0x00000083
-    times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0  ; Pages after the kernel image.
+    times ((1024 - K_PAGE_NUMBER - 1)) dd 0  ; Pages after the kernel image.
 
 
 section .kernel_early_bootstrap
@@ -86,7 +85,7 @@ StartHigherHalf:
 
 	; Paging is enabled at this point
 
-	mov esp, _InitialKernelStack + STACKSIZE
+	mov esp, (_InitialKernelStack + STACKSIZE)
 		
 	push ebx	; Push MultiBoot info structure - WARNING - physical addr may not be in first 4MB
 	push eax	; Push MultiBoot magic number
@@ -106,4 +105,5 @@ section .bss
 align 32
 
 global _InitialKernelStack
+_InitialKernelStack:
 	resb STACKSIZE

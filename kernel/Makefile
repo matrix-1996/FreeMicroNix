@@ -60,7 +60,6 @@ $(KERNEL_X86_OBJS) \
 $(KERNEL_OBJS) \
 $(KERNEL_PROC_OBJS) \
 $(KERNEL_MM_OBJS) \
-loader.o \
 kernel.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
@@ -96,12 +95,12 @@ i686-kernel: $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld
 clean:
 	rm -f freemicronix.kernel $(OBJS) $(ALL_OUR_OBJS) *.o */*.o */*/*.o
 
-install: install-headers install-kernel
+i686-install: i686-install-headers i686-install-kernel
 
-install-headers:
+i686-install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	cp -RTv include $(DESTDIR)$(INCLUDEDIR)
 
-install-kernel: freemicronix.kernel
+i686-install-kernel: i686-kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
 	cp freemicronix.kernel $(DESTDIR)$(BOOTDIR)
