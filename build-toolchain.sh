@@ -20,8 +20,8 @@ set -ex
 mkdir -p toolchain/src
 
 # Set the software versions
-export BINVER='2.26'
-export GCCVER='5.3.0'
+export BINVER='2.27'
+export GCCVER='6.2.0'
 
 # Set the env variables
 export PREFIX=$(pwd)/tools
@@ -31,7 +31,7 @@ export PATH="$PREFIX/i686-elf":$PATH
 # Get the source tarballs
 cd toolchain/src
 wget ftp://ftp.gnu.org/gnu/binutils/binutils-$BINVER.tar.gz
-wget ftp://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-$GCCVER.tar.gz
+wget ftp://ftp.gnu.org/gnu/gcc/gcc-$GCCVER/gcc-$GCCVER.tar.gz
 
 # Extract the souces
 tar -xf binutils-$BINVER.tar.gz
